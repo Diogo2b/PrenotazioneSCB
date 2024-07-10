@@ -2,29 +2,28 @@
 
 namespace App\Entity;
 
-use App\Repository\TicketRepository;
+use App\Repository\PaymentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: TicketRepository::class)]
-class Ticket
+#[ORM\Entity(repositoryClass: PaymentRepository::class)]
+class Payment
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'tickets')]
+    #[ORM\ManyToOne(inversedBy: 'payments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'tickets')]
-    private ?SportMatch $sportMatch = null;
+    #[ORM\Column]
+    private ?int $amount = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $price = null;
+    #[ORM\Column(length: 255)]
+    private ?string $idPayment = null;
 
     #[ORM\Column]
     private ?bool $status = null;
@@ -38,7 +37,7 @@ class Ticket
     /**
      * @var Collection<int, PaymentTicket>
      */
-    #[ORM\OneToMany(targetEntity: PaymentTicket::class, mappedBy: 'ticket')]
+    #[ORM\OneToMany(targetEntity: PaymentTicket::class, mappedBy: 'Payment')]
     private Collection $paymentTickets;
 
     public function __construct()
@@ -63,26 +62,26 @@ class Ticket
         return $this;
     }
 
-    public function getSportMatch(): ?SportMatch
+    public function getAmount(): ?int
     {
-        return $this->sportMatch;
+        return $this->amount;
     }
 
-    public function setSportMatch(?SportMatch $sportMatch): static
+    public function setAmount(int $amount): static
     {
-        $this->sportMatch = $sportMatch;
+        $this->amount = $amount;
 
         return $this;
     }
 
-    public function getPrice(): ?string
+    public function getIdPayment(): ?string
     {
-        return $this->price;
+        return $this->idPayment;
     }
 
-    public function setPrice(string $price): static
+    public function setIdPayment(string $idPayment): static
     {
-        $this->price = $price;
+        $this->idPayment = $idPayment;
 
         return $this;
     }
@@ -135,7 +134,7 @@ class Ticket
     {
         if (!$this->paymentTickets->contains($paymentTicket)) {
             $this->paymentTickets->add($paymentTicket);
-            $paymentTicket->setTicket($this);
+            $paymentTicket->setPayment($this);
         }
 
         return $this;
@@ -145,8 +144,8 @@ class Ticket
     {
         if ($this->paymentTickets->removeElement($paymentTicket)) {
             // set the owning side to null (unless already changed)
-            if ($paymentTicket->getTicket() === $this) {
-                $paymentTicket->setTicket(null);
+            if ($paymentTicket->getPayment() === $this) {
+                $paymentTicket->setPayment(null);
             }
         }
 

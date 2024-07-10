@@ -16,9 +16,6 @@ class SportMatch
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $priceTypeId = null;
-
     #[ORM\Column(length: 255)]
     private ?string $homeTeam = null;
 
@@ -40,6 +37,10 @@ class SportMatch
     #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'sportMatch')]
     private Collection $tickets;
 
+    #[ORM\ManyToOne(inversedBy: 'sportMatches')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?PriceType $priceType = null;
+
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
@@ -48,18 +49,6 @@ class SportMatch
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getPriceTypeId(): ?int
-    {
-        return $this->priceTypeId;
-    }
-
-    public function setPriceTypeId(int $priceTypeId): static
-    {
-        $this->priceTypeId = $priceTypeId;
-
-        return $this;
     }
 
     public function getHomeTeam(): ?string
@@ -148,6 +137,18 @@ class SportMatch
                 $ticket->setSportMatch(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPriceType(): ?PriceType
+    {
+        return $this->priceType;
+    }
+
+    public function setPriceType(?PriceType $priceType): static
+    {
+        $this->priceType = $priceType;
 
         return $this;
     }
