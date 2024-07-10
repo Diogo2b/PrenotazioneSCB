@@ -13,7 +13,7 @@ class UserType extends AbstractType
     {
         $builder
             ->add('email')
-            ->add('roles')
+            // ->add('roles')
             ->add('password')
             ->add('username')
             ->add('firstName')
@@ -23,8 +23,7 @@ class UserType extends AbstractType
             ])
             ->add('updatedAt', null, [
                 'widget' => 'single_text',
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
