@@ -3,6 +3,8 @@
 namespace App\Test\Controller;
 
 use App\Entity\Row;
+use App\Entity\Sector;
+use App\Entity\Tribune;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -34,22 +36,35 @@ class RowControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Row index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $sector = new Sector();
+        $sector->setName('Testing Sector');
+        $sector->setSigle('TS');
+        $sector->setNumberedSeats(true);
+        $sector->setCapacity(100);
+        $sector->setAvailableForSale(true);
+        $sector->setTribune($tribune);
+
+        $this->manager->persist($tribune);
+        $this->manager->persist($sector);
+        $this->manager->flush();
+
         $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Save', [
-            'row[sigle]' => 'Testing',
-            'row[capacity]' => 'Testing',
-            'row[sector]' => 'Testing',
+            'row[sigle]' => 'Testing Row',
+            'row[capacity]' => 10,
+            'row[sector]' => $sector->getId(),
         ]);
 
         self::assertResponseRedirects($this->path);
@@ -59,11 +74,26 @@ class RowControllerTest extends WebTestCase
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $sector = new Sector();
+        $sector->setName('Testing Sector');
+        $sector->setSigle('TS');
+        $sector->setNumberedSeats(true);
+        $sector->setCapacity(100);
+        $sector->setAvailableForSale(true);
+        $sector->setTribune($tribune);
+
+        $this->manager->persist($tribune);
+        $this->manager->persist($sector);
+
         $fixture = new Row();
-        $fixture->setSigle('My Title');
-        $fixture->setCapacity('My Title');
-        $fixture->setSector('My Title');
+        $fixture->setSigle('My Row');
+        $fixture->setCapacity(20);
+        $fixture->setSector($sector);
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -73,16 +103,32 @@ class RowControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Row');
 
-        // Use assertions to check that the properties are properly displayed.
+        $crawler = $this->client->getCrawler();
+        self::assertGreaterThan(0, $crawler->filter('td:contains("My Row")')->count());
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $sector = new Sector();
+        $sector->setName('Testing Sector');
+        $sector->setSigle('TS');
+        $sector->setNumberedSeats(true);
+        $sector->setCapacity(100);
+        $sector->setAvailableForSale(true);
+        $sector->setTribune($tribune);
+
+        $this->manager->persist($tribune);
+        $this->manager->persist($sector);
+
         $fixture = new Row();
         $fixture->setSigle('Value');
-        $fixture->setCapacity('Value');
-        $fixture->setSector('Value');
+        $fixture->setCapacity(30);
+        $fixture->setSector($sector);
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -91,8 +137,8 @@ class RowControllerTest extends WebTestCase
 
         $this->client->submitForm('Update', [
             'row[sigle]' => 'Something New',
-            'row[capacity]' => 'Something New',
-            'row[sector]' => 'Something New',
+            'row[capacity]' => 40,
+            'row[sector]' => $sector->getId(),
         ]);
 
         self::assertResponseRedirects('/row/');
@@ -100,17 +146,32 @@ class RowControllerTest extends WebTestCase
         $fixture = $this->repository->findAll();
 
         self::assertSame('Something New', $fixture[0]->getSigle());
-        self::assertSame('Something New', $fixture[0]->getCapacity());
-        self::assertSame('Something New', $fixture[0]->getSector());
+        self::assertSame(40, $fixture[0]->getCapacity());
+        self::assertSame($sector->getId(), $fixture[0]->getSector()->getId());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $sector = new Sector();
+        $sector->setName('Testing Sector');
+        $sector->setSigle('TS');
+        $sector->setNumberedSeats(true);
+        $sector->setCapacity(100);
+        $sector->setAvailableForSale(true);
+        $sector->setTribune($tribune);
+
+        $this->manager->persist($tribune);
+        $this->manager->persist($sector);
+
         $fixture = new Row();
         $fixture->setSigle('Value');
-        $fixture->setCapacity('Value');
-        $fixture->setSector('Value');
+        $fixture->setCapacity(30);
+        $fixture->setSector($sector);
 
         $this->manager->persist($fixture);
         $this->manager->flush();
