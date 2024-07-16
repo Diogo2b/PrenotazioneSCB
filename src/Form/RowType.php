@@ -18,7 +18,7 @@ class RowType extends AbstractType
             ->add('sigle')
             // ->add('capacity')
             ->add('capacity', IntegerType::class, [
-                'data' => 20, // Definindo o valor padrão como 20
+                'data' => 20, // 20 par defaut dans le formulaire
             ])
             ->add('sector', EntityType::class, [
                 'class' => Sector::class,
