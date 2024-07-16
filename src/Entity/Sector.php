@@ -21,7 +21,7 @@ class Sector
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $sigle = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $numberedSeats = null;
 
     #[ORM\Column]

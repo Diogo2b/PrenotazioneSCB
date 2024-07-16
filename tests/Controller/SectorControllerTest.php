@@ -3,6 +3,7 @@
 namespace App\Test\Controller;
 
 use App\Entity\Sector;
+use App\Entity\Tribune;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -34,25 +35,29 @@ class SectorControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Sector index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $this->manager->persist($tribune);
+        $this->manager->flush();
+
         $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Save', [
             'sector[name]' => 'Testing',
-            'sector[sigle]' => 'Testing',
-            'sector[numberedSeats]' => 'Testing',
-            'sector[capacity]' => 'Testing',
-            'sector[availableForSale]' => 'Testing',
-            'sector[tribune]' => 'Testing',
+            'sector[sigle]' => 'TS',
+            'sector[numberedSeats]' => true,
+            'sector[capacity]' => 100,
+            'sector[availableForSale]' => true,
+            'sector[tribune]' => $tribune->getId(),
         ]);
 
         self::assertResponseRedirects($this->path);
@@ -62,14 +67,20 @@ class SectorControllerTest extends WebTestCase
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $this->manager->persist($tribune);
+
         $fixture = new Sector();
         $fixture->setName('My Title');
-        $fixture->setSigle('My Title');
-        $fixture->setNumberedSeats('My Title');
-        $fixture->setCapacity('My Title');
-        $fixture->setAvailableForSale('My Title');
-        $fixture->setTribune('My Title');
+        $fixture->setSigle('MT');
+        $fixture->setNumberedSeats(true);
+        $fixture->setCapacity(200);
+        $fixture->setAvailableForSale(true);
+        $fixture->setTribune($tribune);
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -79,19 +90,26 @@ class SectorControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Sector');
 
-        // Use assertions to check that the properties are properly displayed.
+        $crawler = $this->client->getCrawler();
+        self::assertGreaterThan(0, $crawler->filter('td:contains("My Title")')->count());
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $this->manager->persist($tribune);
+
         $fixture = new Sector();
         $fixture->setName('Value');
-        $fixture->setSigle('Value');
-        $fixture->setNumberedSeats('Value');
-        $fixture->setCapacity('Value');
-        $fixture->setAvailableForSale('Value');
-        $fixture->setTribune('Value');
+        $fixture->setSigle('V');
+        $fixture->setNumberedSeats(true);
+        $fixture->setCapacity(150);
+        $fixture->setAvailableForSale(true);
+        $fixture->setTribune($tribune);
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -100,11 +118,11 @@ class SectorControllerTest extends WebTestCase
 
         $this->client->submitForm('Update', [
             'sector[name]' => 'Something New',
-            'sector[sigle]' => 'Something New',
-            'sector[numberedSeats]' => 'Something New',
-            'sector[capacity]' => 'Something New',
-            'sector[availableForSale]' => 'Something New',
-            'sector[tribune]' => 'Something New',
+            'sector[sigle]' => 'SN',
+            'sector[numberedSeats]' => true,
+            'sector[capacity]' => 300,
+            'sector[availableForSale]' => false,
+            'sector[tribune]' => $tribune->getId(),
         ]);
 
         self::assertResponseRedirects('/sector/');
@@ -112,23 +130,29 @@ class SectorControllerTest extends WebTestCase
         $fixture = $this->repository->findAll();
 
         self::assertSame('Something New', $fixture[0]->getName());
-        self::assertSame('Something New', $fixture[0]->getSigle());
-        self::assertSame('Something New', $fixture[0]->getNumberedSeats());
-        self::assertSame('Something New', $fixture[0]->getCapacity());
-        self::assertSame('Something New', $fixture[0]->getAvailableForSale());
-        self::assertSame('Something New', $fixture[0]->getTribune());
+        self::assertSame('SN', $fixture[0]->getSigle());
+        self::assertSame(true, $fixture[0]->isNumberedSeats());
+        self::assertSame(300, $fixture[0]->getCapacity());
+        self::assertSame(false, $fixture[0]->isAvailableForSale());
+        self::assertSame($tribune->getId(), $fixture[0]->getTribune()->getId());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
+
+        $this->manager->persist($tribune);
+
         $fixture = new Sector();
         $fixture->setName('Value');
-        $fixture->setSigle('Value');
-        $fixture->setNumberedSeats('Value');
-        $fixture->setCapacity('Value');
-        $fixture->setAvailableForSale('Value');
-        $fixture->setTribune('Value');
+        $fixture->setSigle('V');
+        $fixture->setNumberedSeats(true);
+        $fixture->setCapacity(150);
+        $fixture->setAvailableForSale(true);
+        $fixture->setTribune($tribune);
 
         $this->manager->persist($fixture);
         $this->manager->flush();
