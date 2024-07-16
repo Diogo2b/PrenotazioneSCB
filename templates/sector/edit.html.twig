@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Sector{% endblock %}
+
+{% block body %}
+    <h1>Edit Sector</h1>
+
+    {{ include('sector/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_sector_index') }}">back to list</a>
+
+    {{ include('sector/_delete_form.html.twig') }}
+{% endblock %}
