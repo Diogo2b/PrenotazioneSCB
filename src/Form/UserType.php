@@ -17,13 +17,13 @@ class UserType extends AbstractType
             ->add('password')
             ->add('username')
             ->add('firstName')
-            ->add('lastName')
-            ->add('createdAt', null, [
-                'widget' => 'single_text',
-            ])
-            ->add('updatedAt', null, [
-                'widget' => 'single_text',
-            ]);
+            ->add('lastName');
+        // ->add('createdAt', null, [
+        //     'widget' => 'single_text',
+        // ])
+        // ->add('updatedAt', null, [
+        //     'widget' => 'single_text',
+        // ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
