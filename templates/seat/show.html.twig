@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Seat{% endblock %}
+
+{% block body %}
+    <h1>Seat</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ seat.id }}</td>
+            </tr>
+            <tr>
+                <th>SeatNumber</th>
+                <td>{{ seat.seatNumber }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_seat_index') }}">back to list</a>
+
+    <a href="{{ path('app_seat_edit', {'id': seat.id}) }}">edit</a>
+
+    {{ include('seat/_delete_form.html.twig') }}
+{% endblock %}

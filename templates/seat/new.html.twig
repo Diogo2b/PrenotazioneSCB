@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Seat{% endblock %}
+
+{% block body %}
+    <h1>Create new Seat</h1>
+
+    {{ include('seat/_form.html.twig') }}
+
+    <a href="{{ path('app_seat_index') }}">back to list</a>
+{% endblock %}
