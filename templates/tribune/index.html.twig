@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tribune index{% endblock %}
+
+{% block body %}
+    <h1>Tribune index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Sigle</th>
+                <th>Numbered_seats</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tribune in tribunes %}
+            <tr>
+                <td>{{ tribune.id }}</td>
+                <td>{{ tribune.name }}</td>
+                <td>{{ tribune.sigle }}</td>
+                <td>{{ tribune.numberedSeats ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_tribune_show', {'id': tribune.id}) }}">show</a>
+                    <a href="{{ path('app_tribune_edit', {'id': tribune.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_tribune_new') }}">Create new</a>
+{% endblock %}
