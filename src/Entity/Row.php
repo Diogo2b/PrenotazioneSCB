@@ -97,12 +97,17 @@ class Row
     public function removeSeat(Seat $seat): static
     {
         if ($this->seats->removeElement($seat)) {
-            // set the owning side to null (unless already changed)
+            // définit le côté propriétaire sur null (sauf si déjà modifié)
             if ($seat->getRow() === $this) {
                 $seat->setRow(null);
             }
         }
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getSigle() ?? '';
     }
 }
