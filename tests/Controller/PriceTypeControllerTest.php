@@ -41,14 +41,13 @@ class PriceTypeControllerTest extends WebTestCase
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
         $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Save', [
             'price_type[name]' => 'Testing',
-            'price_type[price]' => 'Testing',
+            'price_type[price]' => '99.99',
         ]);
 
         self::assertResponseRedirects($this->path);
@@ -58,10 +57,9 @@ class PriceTypeControllerTest extends WebTestCase
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
         $fixture = new PriceType();
         $fixture->setName('My Title');
-        $fixture->setPrice('My Title');
+        $fixture->setPrice('99.99');
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -76,10 +74,9 @@ class PriceTypeControllerTest extends WebTestCase
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
         $fixture = new PriceType();
         $fixture->setName('Value');
-        $fixture->setPrice('Value');
+        $fixture->setPrice('99.99');
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -88,7 +85,7 @@ class PriceTypeControllerTest extends WebTestCase
 
         $this->client->submitForm('Update', [
             'price_type[name]' => 'Something New',
-            'price_type[price]' => 'Something New',
+            'price_type[price]' => '199.99',
         ]);
 
         self::assertResponseRedirects('/price/type/');
@@ -96,15 +93,14 @@ class PriceTypeControllerTest extends WebTestCase
         $fixture = $this->repository->findAll();
 
         self::assertSame('Something New', $fixture[0]->getName());
-        self::assertSame('Something New', $fixture[0]->getPrice());
+        self::assertSame('199.99', $fixture[0]->getPrice());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
         $fixture = new PriceType();
         $fixture->setName('Value');
-        $fixture->setPrice('Value');
+        $fixture->setPrice('99.99');
 
         $this->manager->persist($fixture);
         $this->manager->flush();

@@ -34,27 +34,20 @@ class UserControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('User index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
         $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Save', [
-            'user[email]' => 'Testing',
-            'user[roles]' => 'Testing',
-            'user[password]' => 'Testing',
-            'user[username]' => 'Testing',
-            'user[firstName]' => 'Testing',
-            'user[lastName]' => 'Testing',
-            'user[createdAt]' => 'Testing',
-            'user[updatedAt]' => 'Testing',
+            'user[email]' => 'testing@example.com',
+            'user[password]' => 'TestingPassword123',
+            'user[username]' => 'TestingUser',
+            'user[firstName]' => 'TestingFirstName',
+            'user[lastName]' => 'TestingLastName',
         ]);
 
         self::assertResponseRedirects($this->path);
@@ -64,16 +57,15 @@ class UserControllerTest extends WebTestCase
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
         $fixture = new User();
-        $fixture->setEmail('My Title');
-        $fixture->setRoles('My Title');
-        $fixture->setPassword('My Title');
-        $fixture->setUsername('My Title');
-        $fixture->setFirstName('My Title');
-        $fixture->setLastName('My Title');
-        $fixture->setCreatedAt('My Title');
-        $fixture->setUpdatedAt('My Title');
+        $fixture->setEmail('MyTitle@example.com');
+        $fixture->setRoles(['ROLE_USER']);
+        $fixture->setPassword('MyTitlePassword');
+        $fixture->setUsername('MyTitleUsername');
+        $fixture->setFirstName('MyTitleFirstName');
+        $fixture->setLastName('MyTitleLastName');
+        $fixture->setCreatedAt(new \DateTimeImmutable('now'));
+        $fixture->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -83,21 +75,22 @@ class UserControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('User');
 
-        // Use assertions to check that the properties are properly displayed.
+        // Verificar que os dados estão sendo exibidos corretamente
+        self::assertStringContainsString('MyTitle@example.com', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('MyTitleUsername', $this->client->getResponse()->getContent());
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
         $fixture = new User();
-        $fixture->setEmail('Value');
-        $fixture->setRoles('Value');
-        $fixture->setPassword('Value');
-        $fixture->setUsername('Value');
-        $fixture->setFirstName('Value');
-        $fixture->setLastName('Value');
-        $fixture->setCreatedAt('Value');
-        $fixture->setUpdatedAt('Value');
+        $fixture->setEmail('InitialValue@example.com');
+        $fixture->setRoles(['ROLE_USER']);
+        $fixture->setPassword('InitialPassword');
+        $fixture->setUsername('InitialUsername');
+        $fixture->setFirstName('InitialFirstName');
+        $fixture->setLastName('InitialLastName');
+        $fixture->setCreatedAt(new \DateTimeImmutable('now'));
+        $fixture->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -105,42 +98,35 @@ class UserControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
         $this->client->submitForm('Update', [
-            'user[email]' => 'Something New',
-            'user[roles]' => 'Something New',
-            'user[password]' => 'Something New',
-            'user[username]' => 'Something New',
-            'user[firstName]' => 'Something New',
-            'user[lastName]' => 'Something New',
-            'user[createdAt]' => 'Something New',
-            'user[updatedAt]' => 'Something New',
+            'user[email]' => 'UpdatedValue@example.com',
+            'user[password]' => 'UpdatedPassword',
+            'user[username]' => 'UpdatedUsername',
+            'user[firstName]' => 'UpdatedFirstName',
+            'user[lastName]' => 'UpdatedLastName',
         ]);
 
-        self::assertResponseRedirects('/user/');
+        self::assertResponseRedirects($this->path);
 
-        $fixture = $this->repository->findAll();
+        $updatedUser = $this->repository->find($fixture->getId());
 
-        self::assertSame('Something New', $fixture[0]->getEmail());
-        self::assertSame('Something New', $fixture[0]->getRoles());
-        self::assertSame('Something New', $fixture[0]->getPassword());
-        self::assertSame('Something New', $fixture[0]->getUsername());
-        self::assertSame('Something New', $fixture[0]->getFirstName());
-        self::assertSame('Something New', $fixture[0]->getLastName());
-        self::assertSame('Something New', $fixture[0]->getCreatedAt());
-        self::assertSame('Something New', $fixture[0]->getUpdatedAt());
+        self::assertSame('UpdatedValue@example.com', $updatedUser->getEmail());
+        self::assertSame('UpdatedPassword', $updatedUser->getPassword());
+        self::assertSame('UpdatedUsername', $updatedUser->getUsername());
+        self::assertSame('UpdatedFirstName', $updatedUser->getFirstName());
+        self::assertSame('UpdatedLastName', $updatedUser->getLastName());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
         $fixture = new User();
-        $fixture->setEmail('Value');
-        $fixture->setRoles('Value');
-        $fixture->setPassword('Value');
-        $fixture->setUsername('Value');
-        $fixture->setFirstName('Value');
-        $fixture->setLastName('Value');
-        $fixture->setCreatedAt('Value');
-        $fixture->setUpdatedAt('Value');
+        $fixture->setEmail('ToRemove@example.com');
+        $fixture->setRoles(['ROLE_USER']);
+        $fixture->setPassword('ToRemovePassword');
+        $fixture->setUsername('ToRemoveUsername');
+        $fixture->setFirstName('ToRemoveFirstName');
+        $fixture->setLastName('ToRemoveLastName');
+        $fixture->setCreatedAt(new \DateTimeImmutable('now'));
+        $fixture->setUpdatedAt(new \DateTimeImmutable('now'));
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -148,7 +134,7 @@ class UserControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/user/');
+        self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->repository->count([]));
     }
 }
