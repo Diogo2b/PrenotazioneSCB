@@ -6,6 +6,7 @@ use App\Entity\Row;
 use App\Entity\Sector;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -15,7 +16,10 @@ class RowType extends AbstractType
     {
         $builder
             ->add('sigle')
-            ->add('capacity')
+            // ->add('capacity')
+            ->add('capacity', IntegerType::class, [
+                'data' => 20, // Definindo o valor padrão como 20
+            ])
             ->add('sector', EntityType::class, [
                 'class' => Sector::class,
                 'choice_label' => function (Sector $sector) {
