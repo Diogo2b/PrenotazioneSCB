@@ -19,7 +19,7 @@ class Seat
     private ?int $seatNumber = null;
 
     #[ORM\ManyToOne(inversedBy: 'seats')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Row $row = null;
 
     /**
