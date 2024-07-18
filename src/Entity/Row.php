@@ -27,7 +27,7 @@ class Row
     /**
      * @var Collection<int, Seat>
      */
-    #[ORM\OneToMany(targetEntity: Seat::class, mappedBy: 'row')]
+    #[ORM\OneToMany(targetEntity: Seat::class, mappedBy: 'row', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $seats;
 
     public function __construct()
