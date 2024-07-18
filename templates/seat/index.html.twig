@@ -1,35 +1,36 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Seat index{% endblock %}
+{% block title %}Seat index
+{% endblock %}
 
 {% block body %}
-    <h1>Seat index</h1>
+	<h1>Seat index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>SeatNumber</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for seat in seats %}
-            <tr>
-                <td>{{ seat.id }}</td>
-                <td>{{ seat.seatNumber }}</td>
-                <td>
-                    <a href="{{ path('app_seat_show', {'id': seat.id}) }}">show</a>
-                    <a href="{{ path('app_seat_edit', {'id': seat.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>SeatNumber</th>
+				<th>actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for seat in seats %}
+				<tr>
+					<td>{{ seat.id }}</td>
+					<td>{{ seat.seatNumber }}</td>
+					<td>
+						<a href="{{ path('app_seat_show', {'id': seat.id}) }}" class="btn btn-primary">show</a>
+						<a href="{{ path('app_seat_edit', {'id': seat.id}) }}" class="btn btn-warning">edit</a>
+					</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="3">no records found</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 
-    <a href="{{ path('app_seat_new') }}">Create new</a>
+	<a href="{{ path('app_seat_new') }}" class="btn btn-primary">Create new</a>
 {% endblock %}

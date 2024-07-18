@@ -1,11 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Row{% endblock %}
+{% block title %}New Row
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Row</h1>
+	<h1>Create new Row</h1>
 
-    {{ include('row/_form.html.twig') }}
+	{{ include('row/_form.html.twig') }}
 
-    <a href="{{ path('app_row_index') }}">back to list</a>
+	<a href="{{ path('app_row_index') }}" class="btn btn-primary">back to list</a>
 {% endblock %}

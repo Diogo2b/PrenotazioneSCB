@@ -1,43 +1,44 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Sector index{% endblock %}
+{% block title %}Sector index
+{% endblock %}
 
 {% block body %}
-    <h1>Sector index</h1>
+	<h1>Sector index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Sigle</th>
-                <th>NumberedSeats</th>
-                <th>Capacity</th>
-                <th>AvailableForSale</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for sector in sectors %}
-            <tr>
-                <td>{{ sector.id }}</td>
-                <td>{{ sector.name }}</td>
-                <td>{{ sector.sigle }}</td>
-                <td>{{ sector.numberedSeats ? 'Yes' : 'No' }}</td>
-                <td>{{ sector.capacity }}</td>
-                <td>{{ sector.availableForSale ? 'Yes' : 'No' }}</td>
-                <td>
-                    <a href="{{ path('app_sector_show', {'id': sector.id}) }}">show</a>
-                    <a href="{{ path('app_sector_edit', {'id': sector.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Sigle</th>
+				<th>NumberedSeats</th>
+				<th>Capacity</th>
+				<th>AvailableForSale</th>
+				<th>actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for sector in sectors %}
+				<tr>
+					<td>{{ sector.id }}</td>
+					<td>{{ sector.name }}</td>
+					<td>{{ sector.sigle }}</td>
+					<td>{{ sector.numberedSeats ? 'Yes' : 'No' }}</td>
+					<td>{{ sector.capacity }}</td>
+					<td>{{ sector.availableForSale ? 'Yes' : 'No' }}</td>
+					<td>
+						<a href="{{ path('app_sector_show', {'id': sector.id}) }}" class="btn btn-primary">show</a>
+						<a href="{{ path('app_sector_edit', {'id': sector.id}) }}" class="btn btn-warning">edit</a>
+					</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="7">no records found</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 
-    <a href="{{ path('app_sector_new') }}">Create new</a>
+	<a href="{{ path('app_sector_new') }}" class="btn btn-primary">Create new</a>
 {% endblock %}

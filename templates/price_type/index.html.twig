@@ -1,37 +1,38 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}PriceType index{% endblock %}
+{% block title %}PriceType index
+{% endblock %}
 
 {% block body %}
-    <h1>PriceType index</h1>
+	<h1>PriceType index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for price_type in price_types %}
-            <tr>
-                <td>{{ price_type.id }}</td>
-                <td>{{ price_type.name }}</td>
-                <td>{{ price_type.price }}</td>
-                <td>
-                    <a href="{{ path('app_price_type_show', {'id': price_type.id}) }}">show</a>
-                    <a href="{{ path('app_price_type_edit', {'id': price_type.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Name</th>
+				<th>Price</th>
+				<th>actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for price_type in price_types %}
+				<tr>
+					<td>{{ price_type.id }}</td>
+					<td>{{ price_type.name }}</td>
+					<td>{{ price_type.price }}</td>
+					<td>
+						<a href="{{ path('app_price_type_show', {'id': price_type.id}) }}" class="btn btn-primary">show</a>
+						<a href="{{ path('app_price_type_edit', {'id': price_type.id}) }}" class="btn btn-warning btn-sm">edit</a>
+					</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="4">no records found</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 
-    <a href="{{ path('app_price_type_new') }}">Create new</a>
+	<a href="{{ path('app_price_type_new') }}" class="btn btn-primary">Create new</a>
 {% endblock %}
