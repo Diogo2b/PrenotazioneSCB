@@ -27,7 +27,7 @@ class Tribune
     /**
      * @var Collection<int, Sector>
      */
-    #[ORM\OneToMany(targetEntity: Sector::class, mappedBy: 'tribune')]
+    #[ORM\OneToMany(targetEntity: Sector::class, mappedBy: 'tribune', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $sectors;
 
     public function __construct()

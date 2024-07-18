@@ -34,10 +34,7 @@ class Sector
     #[ORM\JoinColumn(nullable: false)]
     private ?Tribune $tribune = null;
 
-    /**
-     * @var Collection<int, Row>
-     */
-    #[ORM\OneToMany(targetEntity: Row::class, mappedBy: 'sector')]
+    #[ORM\OneToMany(targetEntity: Row::class, mappedBy: 'sector', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $listRow;
 
     public function __construct()

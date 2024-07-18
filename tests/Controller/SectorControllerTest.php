@@ -131,9 +131,9 @@ class SectorControllerTest extends WebTestCase
 
         self::assertSame('Something New', $fixture[0]->getName());
         self::assertSame('SN', $fixture[0]->getSigle());
-        self::assertSame(true, $fixture[0]->isNumberedSeats());
+        self::assertTrue($fixture[0]->isNumberedSeats());
         self::assertSame(300, $fixture[0]->getCapacity());
-        self::assertSame(false, $fixture[0]->isAvailableForSale());
+        self::assertFalse($fixture[0]->isAvailableForSale());
         self::assertSame($tribune->getId(), $fixture[0]->getTribune()->getId());
     }
 

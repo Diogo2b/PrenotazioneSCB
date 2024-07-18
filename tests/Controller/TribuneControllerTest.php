@@ -3,6 +3,9 @@
 namespace App\Test\Controller;
 
 use App\Entity\Tribune;
+use App\Entity\Sector;
+use App\Entity\Row;
+use App\Entity\Seat;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -34,9 +37,6 @@ class TribuneControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Tribune index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
     }
 
     public function testNew(): void
@@ -76,7 +76,6 @@ class TribuneControllerTest extends WebTestCase
         $this->assertGreaterThan(0, $crawler->filter('td:contains("Yes")')->count());
     }
 
-
     public function testEdit(): void
     {
         $fixture = new Tribune();
@@ -106,18 +105,49 @@ class TribuneControllerTest extends WebTestCase
 
     public function testRemove(): void
     {
-        $fixture = new Tribune();
-        $fixture->setName('Value');
-        $fixture->setSigle('VL');
-        $fixture->setNumberedSeats(false);
+        $tribune = new Tribune();
+        $tribune->setName('Testing Tribune');
+        $tribune->setSigle('TT');
+        $tribune->setNumberedSeats(true);
 
-        $this->manager->persist($fixture);
+        $sector = new Sector();
+        $sector->setName('Testing Sector');
+        $sector->setSigle('TS');
+        $sector->setNumberedSeats(true);
+        $sector->setCapacity(100);
+        $sector->setAvailableForSale(true);
+        $sector->setTribune($tribune);
+
+        $row = new Row();
+        $row->setSigle('A');
+        $row->setCapacity(20);
+        $row->setSector($sector);
+
+        $seat = new Seat();
+        $seat->setSeatNumber(1);
+        $seat->setRow($row);
+
+        $this->manager->persist($tribune);
+        $this->manager->persist($sector);
+        $this->manager->persist($row);
+        $this->manager->persist($seat);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        // Verificar que todas as entidades foram persistidas
+        self::assertSame(1, $this->manager->getRepository(Tribune::class)->count([]));
+        self::assertSame(1, $this->manager->getRepository(Sector::class)->count([]));
+        self::assertSame(1, $this->manager->getRepository(Row::class)->count([]));
+        self::assertSame(1, $this->manager->getRepository(Seat::class)->count([]));
+
+        // Remover a Tribune
+        $this->client->request('GET', sprintf('%s%s', $this->path, $tribune->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/tribune/');
-        self::assertSame(0, $this->repository->count([]));
+        // Verificar que todas as entidades foram removidas
+        self::assertResponseRedirects($this->path);
+        self::assertSame(0, $this->manager->getRepository(Tribune::class)->count([]));
+        self::assertSame(0, $this->manager->getRepository(Sector::class)->count([]));
+        self::assertSame(0, $this->manager->getRepository(Row::class)->count([]));
+        self::assertSame(0, $this->manager->getRepository(Seat::class)->count([]));
     }
 }
