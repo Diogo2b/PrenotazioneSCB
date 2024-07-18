@@ -39,7 +39,6 @@ class SeatControllerTest extends WebTestCase
 
     public function testNew(): void
     {
-        // Crie um Row para associar ao Seat
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
@@ -51,12 +50,13 @@ class SeatControllerTest extends WebTestCase
 
         $this->client->submitForm('Save', [
             'seat[seatNumber]' => 1,
-            'seat[row]' => $row->getId(), // Use o ID da Row criada
+            'seat[row]' => $row->getId(),
         ]);
 
         self::assertResponseRedirects($this->path);
         self::assertSame(1, $this->repository->count([]));
     }
+
 
     public function testShow(): void
     {
@@ -111,24 +111,59 @@ class SeatControllerTest extends WebTestCase
 
     public function testRemove(): void
     {
-        // Créez une rangée pour associer au siège
+        // Garantir que o banco de dados está limpo
+        foreach ($this->repository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        $this->manager->flush();
+
+        $rowRepository = $this->manager->getRepository(Row::class);
+        foreach ($rowRepository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        $this->manager->flush();
+
+        // Criar a Row e associar Seats
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
         $this->manager->persist($row);
         $this->manager->flush();
 
-        $fixture = new Seat();
-        $fixture->setSeatNumber(1);
-        $fixture->setRow($row);
+        $seat1 = new Seat();
+        $seat1->setSeatNumber(1);
+        $seat1->setRow($row);
+        $this->manager->persist($seat1);
 
-        $this->manager->persist($fixture);
+        $seat2 = new Seat();
+        $seat2->setSeatNumber(2);
+        $seat2->setRow($row);
+        $this->manager->persist($seat2);
+
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        // Verificar que há 2 Seats inicialmente
+        self::assertSame(2, $this->repository->count([]));
+
+        // Remover um Seat
+        $this->client->request('GET', sprintf('%s%s', $this->path, $seat1->getId()));
         $this->client->submitForm('Delete');
 
         self::assertResponseRedirects($this->path);
-        self::assertSame(0, $this->repository->count([]));
+
+        // Verificar que apenas um Seat foi removido
+        self::assertSame(1, $this->repository->count([]));
+
+        // Verificar que a Row ainda existe
+        self::assertSame(1, $rowRepository->count([]));
+
+        // Verificar que o Seat restante está corretamente associado à Row
+        $remainingSeat = $this->repository->findAll()[0];
+        self::assertSame(2, $remainingSeat->getSeatNumber());
+        self::assertSame($row->getId(), $remainingSeat->getRow()->getId());
+
+        // Verificar que não há mais Seats extras
+        $seats = $this->repository->findAll();
+        self::assertCount(1, $seats);
     }
 }
