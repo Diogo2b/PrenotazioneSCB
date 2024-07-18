@@ -13,6 +13,8 @@
 				<th>Sigle</th>
 				<th>Capacity</th>
 				<th>actions</th>
+				<th>infos du secteur</th>
+
 			</tr>
 		</thead>
 		<tbody>
@@ -25,6 +27,7 @@
 						<a href="{{ path('app_row_show', {'id': row.id}) }}" class="btn btn-primary">show</a>
 						<a href="{{ path('app_row_edit', {'id': row.id}) }}" class="btn btn-warning">edit</a>
 					</td>
+					<td>{{ row.sector.name }}</td>
 				</tr>
 			{% else %}
 				<tr>
