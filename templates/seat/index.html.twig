@@ -1,17 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Seat index
+{% block title %}Liste des Sièges
 {% endblock %}
 
 {% block body %}
-	<h1>Seat index</h1>
+	<h1>Liste des Sièges</h1>
 
 	<table class="table">
 		<thead>
 			<tr>
 				<th>Id</th>
-				<th>SeatNumber</th>
-				<th>actions</th>
+				<th>Numéro de Siège</th>
+				<th>Rangée</th>
+				<th>Secteur</th>
+				<th>Tribune</th>
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -19,18 +22,21 @@
 				<tr>
 					<td>{{ seat.id }}</td>
 					<td>{{ seat.seatNumber }}</td>
+					<td>{{ seat.row.sigle }}</td>
+					<td>{{ seat.row.sector.name }}</td>
+					<td>{{ seat.row.sector.tribune.name }}</td>
 					<td>
-						<a href="{{ path('app_seat_show', {'id': seat.id}) }}" class="btn btn-primary">show</a>
-						<a href="{{ path('app_seat_edit', {'id': seat.id}) }}" class="btn btn-warning">edit</a>
+						<a href="{{ path('app_seat_show', {'id': seat.id}) }}" class="btn btn-secondary">Voir</a>
+						<a href="{{ path('app_seat_edit', {'id': seat.id}) }}" class="btn btn-primary">Modifier</a>
 					</td>
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="3">no records found</td>
+					<td colspan="6">Aucun enregistrement trouvé</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 
-	<a href="{{ path('app_seat_new') }}" class="btn btn-primary">Create new</a>
+	<a href="{{ path('app_seat_new') }}" class="btn btn-primary">Créer nouveau</a>
 {% endblock %}
