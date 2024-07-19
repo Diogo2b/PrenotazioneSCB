@@ -4,7 +4,9 @@
 {% endblock %}
 
 {% block body %}
-	<h1>Liste des Sièges</h1>
+	<h1>Liste des Sièges
+		<a href="{{ path('app_seat_new') }}" class="btn btn-primary">Créer nouveau</a>
+	</h1>
 
 	<table class="table">
 		<thead>
