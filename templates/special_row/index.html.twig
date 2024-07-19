@@ -1,20 +1,20 @@
-{# templates/special_row/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Row Index
+{% block title %}Liste des Rangées
 {% endblock %}
 
 {% block body %}
-	<h1>Row Index</h1>
+	<h1>Liste des Rangées</h1>
+	<a href="{{ path('app_special_row_new') }}" class="btn btn-primary mb-3">Créer nouvelle rangée</a>
 
 	<table class="table">
 		<thead>
 			<tr>
 				<th>Id</th>
 				<th>Sigle</th>
-				<th>Capacity</th>
-				<th>Sector</th>
-				<th>actions</th>
+				<th>Capacité</th>
+				<th>Secteur</th>
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -25,17 +25,15 @@
 					<td>{{ row.capacity }}</td>
 					<td>{{ row.sector.name }}</td>
 					<td>
-						<a href="{{ path('app_row_show', {'id': row.id}) }}" class="btn btn-primary">show</a>
-						<a href="{{ path('app_row_edit', {'id': row.id}) }}" class="btn btn-primary">edit</a>
+						<a href="{{ path('app_row_show', {'id': row.id}) }}" class="btn btn-secondary btn-sm">Voir</a>
+						<a href="{{ path('app_row_edit', {'id': row.id}) }}" class="btn btn-primary btn-sm">Modifier</a>
 					</td>
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="5">no records found</td>
+					<td colspan="5">Aucun enregistrement trouvé</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
-
-	<a href="{{ path('app_special_row_new') }}">Crée nouvelle rangée</a>
 {% endblock %}
