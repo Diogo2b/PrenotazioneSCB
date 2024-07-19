@@ -1,14 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Row
+{% block title %}Modifier Rangée
 {% endblock %}
 
 {% block body %}
-	<h1>Edit Row</h1>
+	<h1>Modifier Rangée</h1>
 
-	{{ include('row/_form.html.twig', {'button_label': 'Update'}) }}
+	{{ include('row/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
 
-	<a href="{{ path('app_row_index') }}" class="btn btn-primary">back to list</a>
+	<a href="{{ path('app_row_index') }}" class="btn btn-primary">Retour à la liste</a>
 
 	{{ include('row/_delete_form.html.twig') }}
 {% endblock %}

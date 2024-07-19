@@ -9,68 +9,10 @@
 		<link rel="icon" href="{{ asset('favicon.ico') }}">
 		{% block stylesheets %}
 			{{ encore_entry_link_tags('app') }}
-			<style>
-				body {
-					background-color: #e9ecef;
-					color: #212529;
-					font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-				}
-
-				.navbar {
-					background-color: #1a2b49 !important;
-				}
-
-				.navbar-brand,
-				.nav-link {
-					color: white !important;
-				}
-
-				.navbar-brand:hover,
-				.nav-link:hover {
-					color: #f8f9fa !important;
-				}
-
-				.table th,
-				.table td {
-					border: 1px solid #1a2b49;
-				}
-
-				.table th {
-					background-color: white;
-					color: #1a2b49;
-				}
-
-				.btn-primary {
-					background-color: #1a2b49;
-					border: none;
-				}
-
-				.btn-primary:hover {
-					background-color: darken(#1a2b49, 10%);
-				}
-
-				.btn-secondary {
-					background-color: #007bff;
-					border: none;
-				}
-
-				.btn-secondary:hover {
-					background-color: darken(#007bff, 10%);
-				}
-
-				.btn-danger {
-					background-color: #dc3545;
-					border: none;
-				}
-
-				.btn-danger:hover {
-					background-color: darken(#dc3545, 10%);
-				}
-			</style>
 		{% endblock %}
 	</head>
 	<body>
-		<nav class="navbar navbar-expand-lg navbar-dark">
+		<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 			<a class="navbar-brand" href="#">PrenotazioneSCB</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
@@ -78,22 +20,22 @@
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav">
 					<li class="nav-item">
-						<a class="nav-link" href="{{ path('app_user_index') }}">Utilisateurs</a>
+						<a class="nav-link" href="{{ path('app_user_index') }}">User</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ path('app_tribune_index') }}">Tribunes</a>
+						<a class="nav-link" href="{{ path('app_tribune_index') }}">Tribune</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ path('app_sector_index') }}">Secteurs</a>
+						<a class="nav-link" href="{{ path('app_sector_index') }}">Sector</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ path('app_row_index') }}">Rangées</a>
+						<a class="nav-link" href="{{ path('app_row_index') }}">Row</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ path('app_seat_index') }}">Sièges</a>
+						<a class="nav-link" href="{{ path('app_seat_index') }}">Seat</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{{ path('app_price_type_index') }}">Types de Prix</a>
+						<a class="nav-link" href="{{ path('app_price_type_index') }}">PriceType</a>
 					</li>
 				</ul>
 			</div>

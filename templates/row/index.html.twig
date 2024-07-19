@@ -1,20 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Row index
+{% block title %}Liste des Rangées
 {% endblock %}
 
 {% block body %}
-	<h1>Row index</h1>
+	<h1>Liste des Rangées
+		<a href="{{ path('app_row_new') }}" class="btn btn-primary">Créer nouveau</a>
+	</h1>
 
 	<table class="table">
 		<thead>
 			<tr>
 				<th>Id</th>
 				<th>Sigle</th>
-				<th>Capacity</th>
-				<th>actions</th>
-				<th>infos du secteur</th>
-
+				<th>Capacité</th>
+				<th>Sièges</th>
+				<th>Secteur</th>
+				<th>Tribune</th>
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -23,19 +26,21 @@
 					<td>{{ row.id }}</td>
 					<td>{{ row.sigle }}</td>
 					<td>{{ row.capacity }}</td>
-					<td>
-						<a href="{{ path('app_row_show', {'id': row.id}) }}" class="btn btn-primary">show</a>
-						<a href="{{ path('app_row_edit', {'id': row.id}) }}" class="btn btn-warning">edit</a>
-					</td>
+					<td>{{ row.seats.count }}/{{ row.capacity }}</td>
 					<td>{{ row.sector.name }}</td>
+					<td>{{ row.sector.tribune.name }}</td>
+					<td>
+						<a href="{{ path('app_row_show', {'id': row.id}) }}" class="btn btn-secondary">Voir</a>
+						<a href="{{ path('app_row_edit', {'id': row.id}) }}" class="btn btn-primary">Modifier</a>
+					</td>
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="4">no records found</td>
+					<td colspan="7">Aucun enregistrement trouvé</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 
-	<a href="{{ path('app_row_new') }}" class="btn btn-primary">Create new</a>
+	<a href="{{ path('app_row_new') }}" class="btn btn-primary">Créer nouveau</a>
 {% endblock %}

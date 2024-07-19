@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Row
+{% block title %}Nouvelle Rangée
 {% endblock %}
 
 {% block body %}
-	<h1>Create new Row</h1>
+	<h1>Créer une nouvelle Rangée</h1>
 
 	{{ include('row/_form.html.twig') }}
 
-	<a href="{{ path('app_row_index') }}" class="btn btn-primary">back to list</a>
+	<a href="{{ path('app_row_index') }}" class="btn btn-primary">Retour à la liste</a>
 {% endblock %}
