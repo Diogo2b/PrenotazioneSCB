@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User
+{% block title %}Utilisateur
 {% endblock %}
 
 {% block body %}
-	<h1>User</h1>
+	<h1>Utilisateur</h1>
 
 	<table class="table">
 		<tbody>
@@ -17,39 +17,39 @@
 				<td>{{ user.email }}</td>
 			</tr>
 			<tr>
-				<th>Roles</th>
+				<th>Rôles</th>
 				<td>{{ user.roles ? user.roles|json_encode : '' }}</td>
 			</tr>
 			<tr>
-				<th>Password</th>
+				<th>Mot de Passe</th>
 				<td>{{ user.password }}</td>
 			</tr>
 			<tr>
-				<th>Username</th>
+				<th>Nom d'utilisateur</th>
 				<td>{{ user.username }}</td>
 			</tr>
 			<tr>
-				<th>FirstName</th>
+				<th>Prénom</th>
 				<td>{{ user.firstName }}</td>
 			</tr>
 			<tr>
-				<th>LastName</th>
+				<th>Nom</th>
 				<td>{{ user.lastName }}</td>
 			</tr>
 			<tr>
-				<th>CreatedAt</th>
+				<th>Date de Création</th>
 				<td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : '' }}</td>
 			</tr>
 			<tr>
-				<th>UpdatedAt</th>
+				<th>Date de Mise à Jour</th>
 				<td>{{ user.updatedAt ? user.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
 			</tr>
 		</tbody>
 	</table>
 
-	<a href="{{ path('app_user_index') }}" class="btn btn-primary">back to list</a>
+	<a href="{{ path('app_user_index') }}" class="btn btn-primary">Retour à la liste</a>
 
-	<a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-warning">edit</a>
+	<a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-warning">Modifier</a>
 
 	{{ include('user/_delete_form.html.twig') }}
 {% endblock %}
