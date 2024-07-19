@@ -1,21 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Sector index
+{% block title %}Liste des Secteurs
 {% endblock %}
 
 {% block body %}
-	<h1>Sector index</h1>
+	<h1>Liste des Secteurs
+		<a href="{{ path('app_sector_new') }}" class="btn btn-primary">Créer nouveau</a>
+	</h1>
 
 	<table class="table">
 		<thead>
 			<tr>
 				<th>Id</th>
-				<th>Name</th>
+				<th>Nom</th>
 				<th>Sigle</th>
-				<th>NumberedSeats</th>
-				<th>Capacity</th>
-				<th>AvailableForSale</th>
-				<th>actions</th>
+				<th>Places Numérotées</th>
+				<th>Capacité</th>
+				<th>Disponible à la Vente</th>
+				<th>Nombre de Sièges</th>
+				<!-- Coluna para contagem de sièges -->
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -24,21 +28,23 @@
 					<td>{{ sector.id }}</td>
 					<td>{{ sector.name }}</td>
 					<td>{{ sector.sigle }}</td>
-					<td>{{ sector.numberedSeats ? 'Yes' : 'No' }}</td>
+					<td>{{ sector.numberedSeats ? 'Oui' : 'Non' }}</td>
 					<td>{{ sector.capacity }}</td>
-					<td>{{ sector.availableForSale ? 'Yes' : 'No' }}</td>
+					<td>{{ sector.availableForSale ? 'Oui' : 'Non' }}</td>
+					<td>{{ sector.seatsCount }}</td>
+					<!-- Mostrar a contagem de sièges -->
 					<td>
-						<a href="{{ path('app_sector_show', {'id': sector.id}) }}" class="btn btn-primary">show</a>
-						<a href="{{ path('app_sector_edit', {'id': sector.id}) }}" class="btn btn-warning">edit</a>
+						<a href="{{ path('app_sector_show', {'id': sector.id}) }}" class="btn btn-secondary">Voir</a>
+						<a href="{{ path('app_sector_edit', {'id': sector.id}) }}" class="btn btn-primary">Modifier</a>
 					</td>
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="7">no records found</td>
+					<td colspan="8">Aucun enregistrement trouvé</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 
-	<a href="{{ path('app_sector_new') }}" class="btn btn-primary">Create new</a>
+	<a href="{{ path('app_sector_new') }}" class="btn btn-primary">Créer nouveau</a>
 {% endblock %}
