@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/sector')]
 class SectorController extends AbstractController
@@ -17,8 +17,19 @@ class SectorController extends AbstractController
     #[Route('/', name: 'app_sector_index', methods: ['GET'])]
     public function index(SectorRepository $sectorRepository): Response
     {
+        $sectors = $sectorRepository->findAll();
+
+        // Calculate the total number of seats for each sector
+        foreach ($sectors as $sector) {
+            $seatsCount = 0;
+            foreach ($sector->getListRow() as $row) {
+                $seatsCount += count($row->getSeats());
+            }
+            $sector->seatsCount = $seatsCount; // Temporary property to store seats count
+        }
+
         return $this->render('sector/index.html.twig', [
-            'sectors' => $sectorRepository->findAll(),
+            'sectors' => $sectors,
         ]);
     }
 
@@ -71,7 +82,7 @@ class SectorController extends AbstractController
     #[Route('/{id}', name: 'app_sector_delete', methods: ['POST'])]
     public function delete(Request $request, Sector $sector, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$sector->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $sector->getId(), $request->request->get('_token'))) {
             $entityManager->remove($sector);
             $entityManager->flush();
         }
