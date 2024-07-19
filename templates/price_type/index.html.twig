@@ -1,18 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}PriceType index
+{% block title %}Liste des Types de Prix
 {% endblock %}
 
 {% block body %}
-	<h1>PriceType index</h1>
+	<h1>Liste des Types de Prix
+		<a href="{{ path('app_price_type_new') }}" class="btn btn-primary">Créer nouveau</a>
+	</h1>
 
 	<table class="table">
 		<thead>
 			<tr>
 				<th>Id</th>
-				<th>Name</th>
-				<th>Price</th>
-				<th>actions</th>
+				<th>Nom</th>
+				<th>Prix</th>
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -22,17 +24,17 @@
 					<td>{{ price_type.name }}</td>
 					<td>{{ price_type.price }}</td>
 					<td>
-						<a href="{{ path('app_price_type_show', {'id': price_type.id}) }}" class="btn btn-primary">show</a>
-						<a href="{{ path('app_price_type_edit', {'id': price_type.id}) }}" class="btn btn-warning btn-sm">edit</a>
+						<a href="{{ path('app_price_type_show', {'id': price_type.id}) }}" class="btn btn-secondary">Voir</a>
+						<a href="{{ path('app_price_type_edit', {'id': price_type.id}) }}" class="btn btn-primary">Modifier</a>
 					</td>
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="4">no records found</td>
+					<td colspan="4">Aucun enregistrement trouvé</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 
-	<a href="{{ path('app_price_type_new') }}" class="btn btn-primary">Create new</a>
+	<a href="{{ path('app_price_type_new') }}" class="btn btn-primary">Créer nouveau</a>
 {% endblock %}
