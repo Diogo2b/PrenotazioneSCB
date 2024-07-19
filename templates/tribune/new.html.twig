@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Tribune
+{% block title %}Nouvelle Tribune
 {% endblock %}
 
 {% block body %}
-	<h1>Create new Tribune</h1>
+	<h1>Créer une nouvelle Tribune</h1>
 
 	{{ include('tribune/_form.html.twig') }}
 
-	<a href="{{ path('app_tribune_index') }}" class="btn btn-primary">back to list</a>
+	<a href="{{ path('app_tribune_index') }}" class="btn btn-primary">Retour à la liste</a>
 {% endblock %}

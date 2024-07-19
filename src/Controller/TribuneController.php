@@ -9,16 +9,29 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/tribune')]
 class TribuneController extends AbstractController
 {
     #[Route('/', name: 'app_tribune_index', methods: ['GET'])]
-    public function index(TribuneRepository $tribuneRepository): Response
+    public function index(TribuneRepository $tribuneRepository, EntityManagerInterface $entityManager): Response
     {
+        $tribunes = $tribuneRepository->findAll();
+
+        // Calculate the total number of seats for each tribune
+        foreach ($tribunes as $tribune) {
+            $seatsCount = 0;
+            foreach ($tribune->getSectors() as $sector) {
+                foreach ($sector->getListRow() as $row) {
+                    $seatsCount += count($row->getSeats());
+                }
+            }
+            $tribune->seatsCount = $seatsCount; // Temporary property to store seats count
+        }
+
         return $this->render('tribune/index.html.twig', [
-            'tribunes' => $tribuneRepository->findAll(),
+            'tribunes' => $tribunes,
         ]);
     }
 
@@ -71,7 +84,7 @@ class TribuneController extends AbstractController
     #[Route('/{id}', name: 'app_tribune_delete', methods: ['POST'])]
     public function delete(Request $request, Tribune $tribune, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$tribune->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $tribune->getId(), $request->request->get('_token'))) {
             $entityManager->remove($tribune);
             $entityManager->flush();
         }

@@ -1,19 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Tribune index
+{% block title %}Liste des Tribunes
 {% endblock %}
 
 {% block body %}
-	<h1>Tribune index</h1>
+	<h1>Liste des Tribunes
+		<a href="{{ path('app_tribune_new') }}" class="btn btn-primary">Créer nouveau</a>
+	</h1>
 
 	<table class="table">
 		<thead>
 			<tr>
 				<th>Id</th>
-				<th>Name</th>
+				<th>Nom</th>
 				<th>Sigle</th>
-				<th>Numbered_seats</th>
-				<th>actions</th>
+				<th>Places Numérotées</th>
+				<th>Nombre de Sièges</th>
+				<th>Actions</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -22,19 +25,21 @@
 					<td>{{ tribune.id }}</td>
 					<td>{{ tribune.name }}</td>
 					<td>{{ tribune.sigle }}</td>
-					<td>{{ tribune.numberedSeats ? 'Yes' : 'No' }}</td>
+					<td>{{ tribune.numberedSeats ? 'Oui' : 'Non' }}</td>
+					<td>{{ tribune.seatsCount }}</td>
+					<!-- Mostrar a contagem de sièges -->
 					<td>
-						<a href="{{ path('app_tribune_show', {'id': tribune.id}) }}" class="btn btn-primary">show</a>
-						<a href="{{ path('app_tribune_edit', {'id': tribune.id}) }}" class="btn btn-warning">edit</a>
+						<a href="{{ path('app_tribune_show', {'id': tribune.id}) }}" class="btn btn-secondary">Voir</a>
+						<a href="{{ path('app_tribune_edit', {'id': tribune.id}) }}" class="btn btn-primary">Modifier</a>
 					</td>
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="5">no records found</td>
+					<td colspan="6">Aucun enregistrement trouvé</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 
-	<a href="{{ path('app_tribune_new') }}" class="btn btn-primary">Create new</a>
+	<a href="{{ path('app_tribune_new') }}" class="btn btn-primary">Créer nouveau</a>
 {% endblock %}
