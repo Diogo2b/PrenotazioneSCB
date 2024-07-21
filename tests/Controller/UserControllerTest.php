@@ -33,7 +33,7 @@ class UserControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('User index');
+        self::assertPageTitleContains('Liste des Utilisateurs');
     }
 
     public function testNew(): void
@@ -42,7 +42,7 @@ class UserControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
+        $this->client->submitForm('Enregistrer', [
             'user[email]' => 'testing@example.com',
             'user[password]' => 'TestingPassword123',
             'user[username]' => 'TestingUser',
@@ -73,7 +73,7 @@ class UserControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('User');
+        self::assertPageTitleContains('Utilisateur');
 
         // Verificar que os dados estão sendo exibidos corretamente
         self::assertStringContainsString('MyTitle@example.com', $this->client->getResponse()->getContent());
@@ -97,7 +97,7 @@ class UserControllerTest extends WebTestCase
 
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('Update', [
+        $this->client->submitForm('Mettre à jour', [
             'user[email]' => 'UpdatedValue@example.com',
             'user[password]' => 'UpdatedPassword',
             'user[username]' => 'UpdatedUsername',
@@ -132,7 +132,7 @@ class UserControllerTest extends WebTestCase
         $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
+        $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->repository->count([]));
