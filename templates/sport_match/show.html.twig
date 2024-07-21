@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Match
+{% endblock %}
+
+{% block body %}
+	<h1>Détails du Match</h1>
+
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>Id</th>
+				<td>{{ sport_match.id }}</td>
+			</tr>
+			<tr>
+				<th>Équipe Domicile</th>
+				<td>{{ sport_match.homeTeam }}</td>
+			</tr>
+			<tr>
+				<th>Équipe Visiteuse</th>
+				<td>{{ sport_match.awayTeam }}</td>
+			</tr>
+			<tr>
+				<th>Date du Match</th>
+				<td>{{ sport_match.matchDate ? sport_match.matchDate|date('d-m-Y') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Date de Création</th>
+				<td>{{ sport_match.createdAt ? sport_match.createdAt|date('d-m-Y H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Date de Mise à Jour</th>
+				<td>{{ sport_match.updatedAt ? sport_match.updatedAt|date('d-m-Y H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Type de Prix</th>
+				<td>{{ sport_match.priceType.name }}</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<a href="{{ path('app_sport_match_index') }}" class="btn btn-secondary">Retour à la liste</a>
+	<a href="{{ path('app_sport_match_edit', {'id': sport_match.id}) }}" class="btn btn-primary">Modifier</a>
+
+	{{ include('sport_match/_delete_form.html.twig') }}
+{% endblock %}

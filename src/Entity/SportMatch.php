@@ -7,8 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Doctrine\ORM\Mapping\PrePersist;
+use Doctrine\ORM\Mapping\PreUpdate;
 
 #[ORM\Entity(repositoryClass: SportMatchRepository::class)]
+#[HasLifecycleCallbacks]
 class SportMatch
 {
     #[ORM\Id]
@@ -151,5 +155,21 @@ class SportMatch
         $this->priceType = $priceType;
 
         return $this;
+    }
+    #[PrePersist]
+    public function onPrePersist(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+        $this->homeTeam = strtoupper($this->homeTeam);
+        $this->awayTeam = strtoupper($this->awayTeam);
+    }
+
+    #[PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+        $this->homeTeam = strtoupper($this->homeTeam);
+        $this->awayTeam = strtoupper($this->awayTeam);
     }
 }

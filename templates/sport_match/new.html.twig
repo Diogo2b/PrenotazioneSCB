@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un nouveau Match
+{% endblock %}
+
+{% block body %}
+	<h1>Créer un nouveau Match</h1>
+
+	{{ form_start(form) }}
+	{{ form_widget(form) }}
+	<button class="btn btn-primary">Enregistrer</button>
+	{{ form_end(form) }}
+
+	<a href="{{ path('app_sport_match_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+{% endblock %}

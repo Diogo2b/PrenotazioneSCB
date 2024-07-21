@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Matchs
+{% endblock %}
+
+{% block body %}
+	<h1>Liste des Matchs</h1>
+	<a href="{{ path('app_sport_match_new') }}" class="btn btn-primary mb-3">Créer nouveau</a>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Équipe Domicile</th>
+				<th>Équipe Visiteuse</th>
+				<th>Date du Match</th>
+				<th>Date de Création</th>
+				<th>Date de Mise à Jour</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for sport_match in sport_matches %}
+				<tr>
+					<td>{{ sport_match.id }}</td>
+					<td>{{ sport_match.homeTeam }}</td>
+					<td>{{ sport_match.awayTeam }}</td>
+					<td>{{ sport_match.matchDate ? sport_match.matchDate|date('d-m-Y') : '' }}</td>
+					<td>{{ sport_match.createdAt ? sport_match.createdAt|date('d-m-Y H:i:s') : '' }}</td>
+					<td>{{ sport_match.updatedAt ? sport_match.updatedAt|date('d-m-Y H:i:s') : '' }}</td>
+					<td>
+						<a href="{{ path('app_sport_match_show', {'id': sport_match.id}) }}" class="btn btn-secondary btn-sm">Voir</a>
+						<a href="{{ path('app_sport_match_edit', {'id': sport_match.id}) }}" class="btn btn-primary btn-sm">Modifier</a>
+					</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="7">Aucun enregistrement trouvé</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

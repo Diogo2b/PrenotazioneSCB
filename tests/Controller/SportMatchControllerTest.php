@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Test\Controller;
+
+use App\Entity\SportMatch;
+use App\Entity\PriceType;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+class SportMatchControllerTest extends WebTestCase
+{
+    private KernelBrowser $client;
+    private EntityManagerInterface $manager;
+    private EntityRepository $repository;
+    private EntityRepository $priceTypeRepository;
+    private string $path = '/sport/match/';
+
+    protected function setUp(): void
+    {
+        $this->client = static::createClient();
+        $this->manager = static::getContainer()->get('doctrine')->getManager();
+        $this->repository = $this->manager->getRepository(SportMatch::class);
+        $this->priceTypeRepository = $this->manager->getRepository(PriceType::class);
+
+        foreach ($this->repository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        $this->manager->flush();
+    }
+
+    public function testIndex(): void
+    {
+        $crawler = $this->client->request('GET', $this->path);
+
+        self::assertResponseStatusCodeSame(200);
+        self::assertPageTitleContains('Liste des Matchs');
+    }
+
+    public function testNew(): void
+    {
+        $priceType = new PriceType();
+        $priceType->setName('Test Price Type');
+        $priceType->setPrice(100);
+        $this->manager->persist($priceType);
+        $this->manager->flush();
+
+        $this->client->request('GET', sprintf('%snew', $this->path));
+        self::assertResponseStatusCodeSame(200);
+
+        $this->client->submitForm('Enregistrer', [
+            'sport_match[homeTeam]' => 'Home Team',
+            'sport_match[awayTeam]' => 'Away Team',
+            'sport_match[matchDate]' => '2024-07-20',
+            'sport_match[priceType]' => $priceType->getId(),
+        ]);
+
+        self::assertResponseRedirects($this->path);
+        self::assertSame(1, $this->repository->count([]));
+    }
+
+    public function testShow(): void
+    {
+        $priceType = new PriceType();
+        $priceType->setName('Test Price Type');
+        $priceType->setPrice(100);
+        $this->manager->persist($priceType);
+
+        $sportMatch = new SportMatch();
+        $sportMatch->setHomeTeam('Home Team');
+        $sportMatch->setAwayTeam('Away Team');
+        $sportMatch->setMatchDate(new \DateTime('2024-07-20'));
+        $sportMatch->setCreatedAt(new \DateTimeImmutable());
+        $sportMatch->setUpdatedAt(new \DateTimeImmutable());
+        $sportMatch->setPriceType($priceType);
+        $this->manager->persist($sportMatch);
+        $this->manager->flush();
+
+        $this->client->request('GET', sprintf('%s%s', $this->path, $sportMatch->getId()));
+
+        self::assertResponseStatusCodeSame(200);
+        self::assertPageTitleContains('Détails du Match');
+        $crawler = $this->client->getCrawler();
+        self::assertStringContainsString('Home Team', $crawler->filter('td:contains("Home Team")')->text());
+    }
+
+    public function testEdit(): void
+    {
+        $priceType = new PriceType();
+        $priceType->setName('Test Price Type');
+        $priceType->setPrice(100);
+        $this->manager->persist($priceType);
+
+        $sportMatch = new SportMatch();
+        $sportMatch->setHomeTeam('Home Team');
+        $sportMatch->setAwayTeam('Away Team');
+        $sportMatch->setMatchDate(new \DateTime('2024-07-20'));
+        $sportMatch->setCreatedAt(new \DateTimeImmutable());
+        $sportMatch->setUpdatedAt(new \DateTimeImmutable());
+        $sportMatch->setPriceType($priceType);
+        $this->manager->persist($sportMatch);
+        $this->manager->flush();
+
+        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $sportMatch->getId()));
+
+        $this->client->submitForm('Mettre à jour', [
+            'sport_match[homeTeam]' => 'Updated Home Team',
+            'sport_match[awayTeam]' => 'Updated Away Team',
+            'sport_match[matchDate]' => '2024-08-20',
+            'sport_match[priceType]' => $priceType->getId(),
+        ]);
+
+        self::assertResponseRedirects($this->path);
+        $updatedSportMatch = $this->repository->findAll()[0];
+        self::assertSame('UPDATED HOME TEAM', $updatedSportMatch->getHomeTeam());
+        self::assertSame('UPDATED AWAY TEAM', $updatedSportMatch->getAwayTeam());
+        self::assertSame('2024-08-20', $updatedSportMatch->getMatchDate()->format('Y-m-d'));
+    }
+
+    public function testRemove(): void
+    {
+        $priceType = new PriceType();
+        $priceType->setName('Test Price Type');
+        $priceType->setPrice(100);
+        $this->manager->persist($priceType);
+
+        $sportMatch = new SportMatch();
+        $sportMatch->setHomeTeam('Home Team');
+        $sportMatch->setAwayTeam('Away Team');
+        $sportMatch->setMatchDate(new \DateTime('2024-07-20'));
+        $sportMatch->setCreatedAt(new \DateTimeImmutable());
+        $sportMatch->setUpdatedAt(new \DateTimeImmutable());
+        $sportMatch->setPriceType($priceType);
+        $this->manager->persist($sportMatch);
+        $this->manager->flush();
+
+        $this->client->request('GET', sprintf('%s%s', $this->path, $sportMatch->getId()));
+        $this->client->submitForm('Supprimer');
+
+        self::assertResponseRedirects($this->path);
+        self::assertSame(0, $this->repository->count([]));
+    }
+}
