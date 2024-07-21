@@ -5,7 +5,7 @@ namespace App\Test\Controller;
 use App\Entity\Row;
 use App\Entity\Sector;
 use App\Entity\Tribune;
-use App\Entity\Seat; // Add this line
+use App\Entity\Seat;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -36,7 +36,10 @@ class RowControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Row index');
+        self::assertPageTitleContains('Liste des Rangées');
+
+        self::assertSelectorTextContains('h1', 'Liste des Rangées');
+        self::assertSelectorExists('a.btn.btn-primary:contains("Créer nouveau")');
     }
 
     public function testNew(): void
@@ -62,7 +65,7 @@ class RowControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
+        $this->client->submitForm('Enregistrer', [
             'row[sigle]' => 'Testing Row',
             'row[capacity]' => 10,
             'row[sector]' => $sector->getId(),
@@ -99,13 +102,18 @@ class RowControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Row');
+        self::assertPageTitleContains('Rangée');
 
-        $crawler = $this->client->getCrawler();
-        self::assertGreaterThan(0, $crawler->filter('td:contains("My Row")')->count());
+        self::assertSelectorTextContains('h1', 'Rangée');
+        self::assertSelectorTextContains('table.table > tbody > tr:nth-child(1) > th', 'Id');
+        self::assertSelectorTextContains('table.table > tbody > tr:nth-child(1) > td', (string)$fixture->getId());
+        self::assertSelectorTextContains('table.table > tbody > tr:nth-child(2) > th', 'Sigle');
+        self::assertSelectorTextContains('table.table > tbody > tr:nth-child(2) > td', 'My Row');
+        self::assertSelectorTextContains('table.table > tbody > tr:nth-child(3) > th', 'Capacité');
+        self::assertSelectorTextContains('table.table > tbody > tr:nth-child(3) > td', '20');
     }
 
     public function testEdit(): void
@@ -134,15 +142,15 @@ class RowControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        $crawler = $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('Update', [
+        $this->client->submitForm('Mettre à jour', [
             'row[sigle]' => 'Something New',
             'row[capacity]' => 40,
             'row[sector]' => $sector->getId(),
         ]);
 
-        self::assertResponseRedirects('/row/');
+        self::assertResponseRedirects($this->path);
 
         $fixture = $this->repository->findAll();
 
@@ -188,9 +196,9 @@ class RowControllerTest extends WebTestCase
         $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $row->getId()));
-        $this->client->submitForm('Delete');
+        $this->client->submitForm('Supprimer');
 
-        self::assertResponseRedirects('/row/');
+        self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->repository->count([]));
         self::assertSame(0, $this->manager->getRepository(Seat::class)->count([]));
     }
