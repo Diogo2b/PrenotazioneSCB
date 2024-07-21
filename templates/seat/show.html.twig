@@ -22,11 +22,11 @@
 			</tr>
 			<tr>
 				<th>Secteur</th>
-				<td>{{ seat.row.sector.name }}</td>
+				<td>{{ seat.row.sector.name|default('N/A') }}</td>
 			</tr>
 			<tr>
 				<th>Tribune</th>
-				<td>{{ seat.row.sector.tribune.name }}</td>
+				<td>{{ seat.row.sector.tribune.name|default('N/A') }}</td>
 			</tr>
 		</tbody>
 	</table>

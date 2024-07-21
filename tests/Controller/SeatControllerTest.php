@@ -4,6 +4,8 @@ namespace App\Test\Controller;
 
 use App\Entity\Seat;
 use App\Entity\Row;
+use App\Entity\Tribune; // Add this line
+use App\Entity\Sector; // Add this line
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -34,7 +36,11 @@ class SeatControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Seat index');
+        self::assertPageTitleContains('Liste des Sièges');
+
+        $this->assertSelectorTextContains('h1', 'Liste des Sièges');
+        $this->assertSelectorTextContains('a.btn.btn-primary', 'Créer nouveau');
+        $this->assertSelectorExists('table.table');
     }
 
     public function testNew(): void
@@ -48,7 +54,7 @@ class SeatControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%snew', $this->path));
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
+        $this->client->submitForm('Enregistrer', [
             'seat[seatNumber]' => 1,
             'seat[row]' => $row->getId(),
         ]);
@@ -57,13 +63,30 @@ class SeatControllerTest extends WebTestCase
         self::assertSame(1, $this->repository->count([]));
     }
 
-
     public function testShow(): void
     {
+        // Crie um Tribune para associar ao Sector
+        $tribune = new Tribune();
+        $tribune->setName('Tribune 1');
+        $tribune->setNumberedSeats(true); // Definindo numbered_seats
+        $this->manager->persist($tribune);
+        $this->manager->flush();
+
+        // Crie um Sector para associar ao Row
+        $sector = new Sector();
+        $sector->setName('Sector 1');
+        $sector->setCapacity(100);
+        $sector->setNumberedSeats(true);
+        $sector->setAvailableForSale(true);
+        $sector->setTribune($tribune);
+        $this->manager->persist($sector);
+        $this->manager->flush();
+
         // Crie um Row para associar ao Seat
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
+        $row->setSector($sector);
         $this->manager->persist($row);
         $this->manager->flush();
 
@@ -77,12 +100,22 @@ class SeatControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Seat');
+
+        // Ajuste esta linha com o título correto da página
+        self::assertPageTitleContains('Détails du Siège');
     }
+
+
+
+
+
+
+
+
 
     public function testEdit(): void
     {
-        // Creation d'une rangéé pour associer au  Seat(siége)
+        // Criação de uma Row para associar ao Seat
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
@@ -98,9 +131,12 @@ class SeatControllerTest extends WebTestCase
 
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('Update', [
+        self::assertResponseStatusCodeSame(200);
+        self::assertPageTitleContains('Modifier Siège');
+
+        $this->client->submitForm('Mettre à jour', [
             'seat[seatNumber]' => 2,
-            'seat[row]' => $row->getId(), //  ID de Row cré
+            'seat[row]' => $row->getId(),
         ]);
 
         self::assertResponseRedirects($this->path);
@@ -147,7 +183,7 @@ class SeatControllerTest extends WebTestCase
 
         // Remover um Seat
         $this->client->request('GET', sprintf('%s%s', $this->path, $seat1->getId()));
-        $this->client->submitForm('Delete');
+        $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);
 
