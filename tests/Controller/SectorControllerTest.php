@@ -34,7 +34,7 @@ class SectorControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Sector index');
+        self::assertPageTitleContains('Liste des Secteurs');
     }
 
     public function testNew(): void
@@ -51,7 +51,7 @@ class SectorControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
+        $this->client->submitForm('Créer', [
             'sector[name]' => 'Testing',
             'sector[sigle]' => 'TS',
             'sector[numberedSeats]' => true,
@@ -88,7 +88,7 @@ class SectorControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Sector');
+        self::assertPageTitleContains('Détails du Secteur');
 
         $crawler = $this->client->getCrawler();
         self::assertGreaterThan(0, $crawler->filter('td:contains("My Title")')->count());
@@ -116,7 +116,7 @@ class SectorControllerTest extends WebTestCase
 
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('Update', [
+        $this->client->submitForm('Mettre à jour', [
             'sector[name]' => 'Something New',
             'sector[sigle]' => 'SN',
             'sector[numberedSeats]' => true,
@@ -158,7 +158,7 @@ class SectorControllerTest extends WebTestCase
         $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
+        $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects('/sector/');
         self::assertSame(0, $this->repository->count([]));
