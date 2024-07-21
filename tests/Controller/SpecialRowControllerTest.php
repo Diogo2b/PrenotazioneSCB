@@ -67,7 +67,7 @@ class SpecialRowControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
+        $this->client->submitForm('Enregistrer', [
             'special_row[sigle]' => 'Testing Special Row',
             'special_row[capacity]' => 10,
             'special_row[sector]' => $sector->getId(),
@@ -94,6 +94,6 @@ class SpecialRowControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Row Index');
+        self::assertPageTitleContains('Liste des Rangées');
     }
 }
