@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Tickets
+{% endblock %}
+
+{% block body %}
+	<h1>Liste des Tickets</h1>
+
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Prix</th>
+				<th>Statut</th>
+				<th>Date de création</th>
+				<th>Date de mise à jour</th>
+				<th>Match</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for ticket in tickets %}
+				<tr>
+					<td>{{ ticket.id }}</td>
+					<td>{{ ticket.price }}</td>
+					<td>{{ ticket.status ? 'Oui' : 'Non' }}</td>
+					<td>{{ ticket.createdAt ? ticket.createdAt|date('d-m-Y H:i:s') : '' }}</td>
+					<td>{{ ticket.updatedAt ? ticket.updatedAt|date('d-m-Y H:i:s') : '' }}</td>
+					<td>{{ ticket.sportMatch ? ticket.sportMatch.homeTeam ~ ' vs ' ~ ticket.sportMatch.awayTeam : '' }}</td>
+					<td>
+						<a href="{{ path('app_ticket_show', {'id': ticket.id}) }}" class="btn btn-secondary">Voir</a>
+						<a href="{{ path('app_ticket_edit', {'id': ticket.id}) }}" class="btn btn-primary">Modifier</a>
+					</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="7">Aucun enregistrement trouvé</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<a href="{{ path('app_ticket_new') }}" class="btn btn-primary">Créer nouveau</a>
+{% endblock %}

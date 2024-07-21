@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ticket
+{% endblock %}
+
+{% block body %}
+	<h1>Ticket</h1>
+
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>Id</th>
+				<td>{{ ticket.id }}</td>
+			</tr>
+			<tr>
+				<th>Prix</th>
+				<td>{{ ticket.price }}</td>
+			</tr>
+			<tr>
+				<th>Statut</th>
+				<td>{{ ticket.status ? 'Oui' : 'Non' }}</td>
+			</tr>
+			<tr>
+				<th>Date de création</th>
+				<td>{{ ticket.createdAt ? ticket.createdAt|date('d-m-Y H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Date de mise à jour</th>
+				<td>{{ ticket.updatedAt ? ticket.updatedAt|date('d-m-Y H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Match</th>
+				<td>{{ ticket.sportMatch ? ticket.sportMatch.homeTeam ~ ' vs ' ~ ticket.sportMatch.awayTeam : '' }}</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<a href="{{ path('app_ticket_index') }}" class="btn btn-primary">Retour à la liste</a>
+
+	<a href="{{ path('app_ticket_edit', {'id': ticket.id}) }}" class="btn btn-primary">Modifier</a>
+
+	{{ include('ticket/_delete_form.html.twig') }}
+{% endblock %}

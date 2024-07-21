@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Billet
+{% endblock %}
+
+{% block body %}
+	<h1>Créer un nouveau Billet</h1>
+
+	{{ include('ticket/_form.html.twig') }}
+
+	<a href="{{ path('app_ticket_index') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %}
