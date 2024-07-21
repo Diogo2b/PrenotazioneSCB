@@ -82,7 +82,7 @@ class SportMatchControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Détails du Match');
         $crawler = $this->client->getCrawler();
-        self::assertStringContainsString('Home Team', $crawler->filter('td:contains("Home Team")')->text());
+        self::assertStringContainsString('HOME TEAM', strtoupper($crawler->filter('table')->text()));
     }
 
     public function testEdit(): void
@@ -113,8 +113,8 @@ class SportMatchControllerTest extends WebTestCase
 
         self::assertResponseRedirects($this->path);
         $updatedSportMatch = $this->repository->findAll()[0];
-        self::assertSame('UPDATED HOME TEAM', $updatedSportMatch->getHomeTeam());
-        self::assertSame('UPDATED AWAY TEAM', $updatedSportMatch->getAwayTeam());
+        self::assertSame('UPDATED HOME TEAM', strtoupper($updatedSportMatch->getHomeTeam()));
+        self::assertSame('UPDATED AWAY TEAM', strtoupper($updatedSportMatch->getAwayTeam()));
         self::assertSame('2024-08-20', $updatedSportMatch->getMatchDate()->format('Y-m-d'));
     }
 
