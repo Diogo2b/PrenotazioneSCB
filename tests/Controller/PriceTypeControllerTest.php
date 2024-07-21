@@ -33,19 +33,19 @@ class PriceTypeControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('PriceType index');
+        self::assertPageTitleContains('Liste des Types de Prix');
 
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+        self::assertSelectorTextContains('h1', 'Liste des Types de Prix');
+        self::assertSelectorExists('a.btn.btn-primary:contains("Créer nouveau")');
     }
 
     public function testNew(): void
     {
-        $this->client->request('GET', sprintf('%snew', $this->path));
+        $crawler = $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
+        $this->client->submitForm('Enregistrer', [
             'price_type[name]' => 'Testing',
             'price_type[price]' => '99.99',
         ]);
@@ -64,12 +64,26 @@ class PriceTypeControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('PriceType');
+        self::assertPageTitleContains('Type de Prix');
 
-        // Use assertions to check that the properties are properly displayed.
+        self::assertSelectorTextContains('h1', 'Type de Prix');
+
+        // Verificar células específicas dentro das linhas da tabela
+        $this->assertTableRowText($crawler, 1, 'Id', (string)$fixture->getId());
+        $this->assertTableRowText($crawler, 2, 'Nom', 'My Title');
+        $this->assertTableRowText($crawler, 3, 'Prix', '99.99');
+    }
+
+    private function assertTableRowText($crawler, int $row, string $header, string $value)
+    {
+        $headerSelector = sprintf('table.table > tbody > tr:nth-child(%d) > th', $row);
+        $valueSelector = sprintf('table.table > tbody > tr:nth-child(%d) > td', $row);
+
+        self::assertSelectorTextContains($headerSelector, $header);
+        self::assertSelectorTextContains($valueSelector, $value);
     }
 
     public function testEdit(): void
@@ -81,14 +95,14 @@ class PriceTypeControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        $crawler = $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('Update', [
+        $this->client->submitForm('Mettre à jour', [
             'price_type[name]' => 'Something New',
             'price_type[price]' => '199.99',
         ]);
 
-        self::assertResponseRedirects('/price/type/');
+        self::assertResponseRedirects($this->path);
 
         $fixture = $this->repository->findAll();
 
@@ -105,10 +119,10 @@ class PriceTypeControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
+        $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $this->client->submitForm('Supprimer');
 
-        self::assertResponseRedirects('/price/type/');
+        self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->repository->count([]));
     }
 }
