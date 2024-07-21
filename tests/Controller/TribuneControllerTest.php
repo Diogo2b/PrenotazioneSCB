@@ -36,7 +36,7 @@ class TribuneControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Tribune index');
+        self::assertPageTitleContains('Liste des Tribunes');
     }
 
     public function testNew(): void
@@ -45,7 +45,7 @@ class TribuneControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
+        $this->client->submitForm('Enregistrer', [
             'tribune[name]' => 'Testing',
             'tribune[sigle]' => 'TS',
             'tribune[numbered_seats]' => true,
@@ -69,11 +69,11 @@ class TribuneControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Tribune');
+        self::assertPageTitleContains('Détails de la Tribune');
 
-        $this->assertGreaterThan(0, $crawler->filter('td:contains("My Title")')->count());
-        $this->assertGreaterThan(0, $crawler->filter('td:contains("MT")')->count());
-        $this->assertGreaterThan(0, $crawler->filter('td:contains("Yes")')->count());
+        self::assertStringContainsString('My Title', $crawler->filter('body')->text());
+        self::assertStringContainsString('MT', $crawler->filter('body')->text());
+        self::assertStringContainsString('Oui', $crawler->filter('body')->text());
     }
 
     public function testEdit(): void
@@ -88,13 +88,13 @@ class TribuneControllerTest extends WebTestCase
 
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
 
-        $this->client->submitForm('Update', [
+        $this->client->submitForm('Mettre à jour', [
             'tribune[name]' => 'Something New',
             'tribune[sigle]' => 'SN',
             'tribune[numbered_seats]' => true,
         ]);
 
-        self::assertResponseRedirects('/tribune/');
+        self::assertResponseRedirects($this->path);
 
         $fixture = $this->repository->findAll();
 
@@ -141,7 +141,7 @@ class TribuneControllerTest extends WebTestCase
 
         // Remover a Tribune
         $this->client->request('GET', sprintf('%s%s', $this->path, $tribune->getId()));
-        $this->client->submitForm('Delete');
+        $this->client->submitForm('Supprimer');
 
         // Verificar que todas as entidades foram removidas
         self::assertResponseRedirects($this->path);
