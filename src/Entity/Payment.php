@@ -6,8 +6,10 @@ use App\Repository\PaymentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity(repositoryClass: PaymentRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Payment
 {
     #[ORM\Id]
@@ -19,11 +21,8 @@ class Payment
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column]
-    private ?int $amount = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $idPayment = null;
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private ?string $amount = null;
 
     #[ORM\Column]
     private ?bool $status = null;
@@ -45,6 +44,18 @@ class Payment
         $this->paymentTickets = new ArrayCollection();
     }
 
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -62,26 +73,14 @@ class Payment
         return $this;
     }
 
-    public function getAmount(): ?int
+    public function getAmount(): ?string
     {
         return $this->amount;
     }
 
-    public function setAmount(int $amount): static
+    public function setAmount(string $amount): static
     {
         $this->amount = $amount;
-
-        return $this;
-    }
-
-    public function getIdPayment(): ?string
-    {
-        return $this->idPayment;
-    }
-
-    public function setIdPayment(string $idPayment): static
-    {
-        $this->idPayment = $idPayment;
 
         return $this;
     }
