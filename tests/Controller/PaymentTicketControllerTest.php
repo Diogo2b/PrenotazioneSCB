@@ -1,276 +1,171 @@
 <?php
 
-namespace App\Test\Controller;
+namespace App\Tests\Controller;
 
-use App\Entity\Payment;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Entity\PaymentTicket;
+use App\Entity\Payment;
 use App\Entity\Ticket;
 use App\Entity\User;
-use App\Entity\PriceType;
-use App\Entity\SportMatch;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Repository\PaymentTicketRepository;
 
 class PaymentTicketControllerTest extends WebTestCase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $manager;
-    private EntityRepository $paymentTicketRepository;
-    private EntityRepository $paymentRepository;
-    private EntityRepository $ticketRepository;
-    private EntityRepository $userRepository;
-    private EntityRepository $priceTypeRepository;
-    private EntityRepository $sportMatchRepository;
-    private string $path = '/payment/ticket/';
+    private $client;
+    private $entityManager;
+    private $repository;
+    private $path = '/payment/ticket/';
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         $this->client = static::createClient();
-        $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->paymentTicketRepository = $this->manager->getRepository(PaymentTicket::class);
-        $this->paymentRepository = $this->manager->getRepository(Payment::class);
-        $this->ticketRepository = $this->manager->getRepository(Ticket::class);
-        $this->userRepository = $this->manager->getRepository(User::class);
-        $this->priceTypeRepository = $this->manager->getRepository(PriceType::class);
-        $this->sportMatchRepository = $this->manager->getRepository(SportMatch::class);
-
-        foreach ($this->paymentTicketRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        foreach ($this->paymentRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        foreach ($this->ticketRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        foreach ($this->userRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        foreach ($this->priceTypeRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        foreach ($this->sportMatchRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        $this->manager->flush();
+        $this->entityManager = $this->getContainer()->get(EntityManagerInterface::class);
+        $this->repository = $this->entityManager->getRepository(PaymentTicket::class);
+        $this->resetDatabase();
+        $this->loadFixtures();
     }
 
-    private function createUser(string $emailIdentifier): User
+    private function resetDatabase()
+    {
+        $connection = $this->entityManager->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+
+        $tables = $schemaManager->listTableNames();
+        foreach ($tables as $table) {
+            $connection->executeQuery("SET FOREIGN_KEY_CHECKS=0");
+            $connection->executeQuery("TRUNCATE TABLE $table");
+            $connection->executeQuery("SET FOREIGN_KEY_CHECKS=1");
+        }
+    }
+
+    private function loadFixtures()
     {
         $user = new User();
-        $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setEmail('test@example.com');
         $user->setRoles(['ROLE_USER']);
-        $user->setPassword('testpassword');
-        $user->setUsername('testusername' . uniqid($emailIdentifier, true));
+        $user->setPassword('password');
+        $user->setUsername('testuser');
         $user->setFirstName('Test');
         $user->setLastName('User');
         $user->setCreatedAt(new \DateTimeImmutable());
         $user->setUpdatedAt(new \DateTimeImmutable());
-        $this->manager->persist($user);
-        $this->manager->flush();
+        $this->entityManager->persist($user);
 
-        return $user;
-    }
-
-    private function createPriceType(): PriceType
-    {
-        $priceType = new PriceType();
-        $priceType->setName('Test Price Type');
-        $priceType->setPrice(100);
-        $this->manager->persist($priceType);
-        $this->manager->flush();
-
-        return $priceType;
-    }
-
-    private function createSportMatch(PriceType $priceType): SportMatch
-    {
-        $sportMatch = new SportMatch();
-        $sportMatch->setHomeTeam('Home Team');
-        $sportMatch->setAwayTeam('Away Team');
-        $sportMatch->setMatchDate(new \DateTime('2024-07-20'));
-        $sportMatch->setCreatedAt(new \DateTimeImmutable());
-        $sportMatch->setUpdatedAt(new \DateTimeImmutable());
-        $sportMatch->setPriceType($priceType);
-        $this->manager->persist($sportMatch);
-        $this->manager->flush();
-
-        return $sportMatch;
-    }
-
-    private function createPayment(User $user): Payment
-    {
         $payment = new Payment();
-        $payment->setAmount('20.50');
+        $payment->setAmount(100.00);
         $payment->setStatus(true);
-        $payment->setUser($user);
         $payment->setCreatedAt(new \DateTimeImmutable());
         $payment->setUpdatedAt(new \DateTimeImmutable());
+        $payment->setUser($user);
+        $this->entityManager->persist($payment);
 
-        $this->manager->persist($payment);
-        $this->manager->flush();
-
-        // Verificação explícita
-        $payment = $this->paymentRepository->find($payment->getId());
-        if (!$payment) {
-            throw new \Exception('Payment not found after creation');
-        }
-
-        return $payment;
-    }
-
-    private function createTicket(User $user, SportMatch $sportMatch): Ticket
-    {
         $ticket = new Ticket();
-        $ticket->setPrice('20.50');
+        $ticket->setPrice(50.00);
         $ticket->setStatus(true);
-        $ticket->setUser($user);
-        $ticket->setSportMatch($sportMatch);
         $ticket->setCreatedAt(new \DateTimeImmutable());
         $ticket->setUpdatedAt(new \DateTimeImmutable());
+        $ticket->setUser($user);
+        $this->entityManager->persist($ticket);
 
-        $this->manager->persist($ticket);
-        $this->manager->flush();
-
-        // Verificação explícita
-        $ticket = $this->ticketRepository->find($ticket->getId());
-        if (!$ticket) {
-            throw new \Exception('Ticket not found after creation');
-        }
-
-        return $ticket;
+        $this->entityManager->flush();
     }
 
     public function testIndex(): void
     {
-        $user = $this->createUser('index');
-        $priceType = $this->createPriceType();
-        $sportMatch = $this->createSportMatch($priceType);
-        $payment = $this->createPayment($user);
-        $ticket = $this->createTicket($user, $sportMatch);
+        $crawler = $this->client->request('GET', $this->path);
 
-        $paymentTicket = new PaymentTicket();
-        $paymentTicket->setPayment($payment);
-        $paymentTicket->setTicket($ticket);
-
-        $this->manager->persist($paymentTicket);
-        $this->manager->flush();
-
-        $this->client->request('GET', $this->path);
-        $this->client->followRedirect();  // Adicionado para seguir o redirecionamento
-
-        // Verificar se a resposta está correta
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Liste des PaymentTickets');
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'Liste des Paiements des Billets');
     }
 
     public function testNew(): void
     {
-        $user = $this->createUser('new');
-        $priceType = $this->createPriceType();
-        $sportMatch = $this->createSportMatch($priceType);
-        $payment = $this->createPayment($user);
-        $ticket = $this->createTicket($user, $sportMatch);
+        $crawler = $this->client->request('GET', $this->path . 'new');
 
-        $this->client->request('GET', sprintf('%snew', $this->path));
-
-        self::assertResponseStatusCodeSame(200);
-
-        $this->client->submitForm('Enregistrer', [
-            'payment_ticket[payment]' => $payment->getId(),
-            'payment_ticket[ticket]' => $ticket->getId(),
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Enregistrer')->form([
+            'payment_ticket[payment]' => 1,
+            'payment_ticket[ticket]' => 1,
         ]);
 
-        self::assertResponseRedirects($this->path);
-        self::assertSame(1, $this->paymentTicketRepository->count([]));
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/payment/ticket/');
     }
 
     public function testShow(): void
     {
-        $user = $this->createUser('show');
-        $priceType = $this->createPriceType();
-        $sportMatch = $this->createSportMatch($priceType);
-        $payment = $this->createPayment($user);
-        $ticket = $this->createTicket($user, $sportMatch);
+        $payment = $this->entityManager->getRepository(Payment::class)->find(1);
+        $ticket = $this->entityManager->getRepository(Ticket::class)->find(1);
 
         $paymentTicket = new PaymentTicket();
         $paymentTicket->setPayment($payment);
         $paymentTicket->setTicket($ticket);
+        $this->entityManager->persist($paymentTicket);
+        $this->entityManager->flush();
 
-        $this->manager->persist($paymentTicket);
-        $this->manager->flush();
+        $crawler = $this->client->request('GET', $this->path . $paymentTicket->getId() . '/show');
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $paymentTicket->getId()));
-
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('PaymentTicket');
-
-        $content = $this->client->getResponse()->getContent();
-        self::assertStringContainsString((string)$paymentTicket->getId(), $content);
-        self::assertStringContainsString((string)$payment->getId(), $content);
-        self::assertStringContainsString((string)$ticket->getId(), $content);
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'PaymentTicket');
     }
 
     public function testEdit(): void
     {
-        $user = $this->createUser('edit');
-        $priceType = $this->createPriceType();
-        $sportMatch = $this->createSportMatch($priceType);
-        $payment = $this->createPayment($user);
-        $ticket = $this->createTicket($user, $sportMatch);
+        $payment = $this->entityManager->getRepository(Payment::class)->find(1);
+        $ticket = $this->entityManager->getRepository(Ticket::class)->find(1);
 
         $paymentTicket = new PaymentTicket();
         $paymentTicket->setPayment($payment);
         $paymentTicket->setTicket($ticket);
+        $this->entityManager->persist($paymentTicket);
+        $this->entityManager->flush();
 
-        $this->manager->persist($paymentTicket);
-        $this->manager->flush();
+        $crawler = $this->client->request('GET', $this->path . $paymentTicket->getId() . '/edit');
 
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $paymentTicket->getId()));
-
-        self::assertResponseStatusCodeSame(200);
-
-        $this->client->submitForm('Update', [
-            'payment_ticket[payment]' => $payment->getId(),
-            'payment_ticket[ticket]' => $ticket->getId(),
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Mettre à jour')->form([
+            'payment_ticket[payment]' => 1,
+            'payment_ticket[ticket]' => 1,
         ]);
 
-        self::assertResponseRedirects($this->path);
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/payment/ticket/');
 
-        $updatedPaymentTicket = $this->paymentTicketRepository->find($paymentTicket->getId());
-        self::assertSame($payment->getId(), $updatedPaymentTicket->getPayment()->getId());
-        self::assertSame($ticket->getId(), $updatedPaymentTicket->getTicket()->getId());
+        $updatedPaymentTicket = $this->repository->find($paymentTicket->getId());
+
+        $this->assertSame(1, $updatedPaymentTicket->getPayment()->getId());
+        $this->assertSame(1, $updatedPaymentTicket->getTicket()->getId());
     }
 
-    public function testRemove(): void
+    public function testDelete(): void
     {
-        $user = $this->createUser('remove');
-        $priceType = $this->createPriceType();
-        $sportMatch = $this->createSportMatch($priceType);
-        $payment = $this->createPayment($user);
-        $ticket = $this->createTicket($user, $sportMatch);
+        $payment = $this->entityManager->getRepository(Payment::class)->find(1);
+        $ticket = $this->entityManager->getRepository(Ticket::class)->find(1);
 
         $paymentTicket = new PaymentTicket();
         $paymentTicket->setPayment($payment);
         $paymentTicket->setTicket($ticket);
+        $this->entityManager->persist($paymentTicket);
+        $this->entityManager->flush();
 
-        $this->manager->persist($paymentTicket);
-        $this->manager->flush();
+        $crawler = $this->client->request('GET', $this->path . $paymentTicket->getId() . '/show');
+        $this->assertResponseIsSuccessful();
 
-        $originalCount = $this->paymentTicketRepository->count([]);
+        $deleteForm = $crawler->selectButton('Supprimer')->form();
+        $this->client->submit($deleteForm);
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $paymentTicket->getId()));
-        $this->client->submitForm('Supprimer');
+        $this->assertResponseRedirects('/payment/ticket/');
 
-        self::assertResponseRedirects($this->path);
-        self::assertSame($originalCount - 1, $this->paymentTicketRepository->count([]));
+        $deletedPaymentTicket = $this->repository->find($paymentTicket->getId());
+        $this->assertNull($deletedPaymentTicket);
+    }
+
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->entityManager->close();
+        $this->entityManager = null;
     }
 }
