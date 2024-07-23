@@ -16,19 +16,27 @@ class PaymentControllerTest extends WebTestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
+        $this->clearDatabase();
+    }
 
-        // Clean up the database before each test
-        foreach ($this->manager->getRepository(Payment::class)->findAll() as $object) {
-            $this->manager->remove($object);
-        }
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->clearDatabase();
+    }
 
-        foreach ($this->manager->getRepository(User::class)->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        $this->manager->flush();
+    private function clearDatabase(): void
+    {
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE payment');
+        $connection->executeStatement('TRUNCATE TABLE user');
+        $connection->executeStatement('TRUNCATE TABLE ticket');
+        $connection->executeStatement('TRUNCATE TABLE payment_ticket');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     private function createUser(string $emailIdentifier): User
@@ -53,9 +61,9 @@ class PaymentControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Liste des Paiements');  // Atualizando o título esperado
+        self::assertPageTitleContains('Liste des Paiements');
+        self::assertSelectorTextContains('h1', 'Liste des Paiements');
     }
-
 
     public function testNew(): void
     {
@@ -89,13 +97,13 @@ class PaymentControllerTest extends WebTestCase
         $this->manager->persist($payment);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $payment->getId()));
+        // Use the correct show URL
+        $this->client->request('GET', sprintf('%s%s/show', $this->path, $payment->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Paiement');  // Atualizando o título esperado
-        self::assertStringContainsString('20.50', $this->client->getResponse()->getContent());
+        self::assertPageTitleContains('Paiement');
+        self::assertSelectorTextContains('body', '20.50');
     }
-
 
     public function testEdit(): void
     {
@@ -127,7 +135,6 @@ class PaymentControllerTest extends WebTestCase
         self::assertFalse($updatedPayment->isStatus());
     }
 
-
     public function testRemove(): void
     {
         $user = $this->createUser('remove');
@@ -142,7 +149,9 @@ class PaymentControllerTest extends WebTestCase
         $this->manager->persist($payment);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $payment->getId()));
+        $this->client->request('GET', sprintf('%s%s/show', $this->path, $payment->getId()));
+
+        // Verificar o botão "Supprimer" e submetê-lo
         $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);
