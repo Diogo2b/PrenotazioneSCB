@@ -3,6 +3,9 @@
 namespace App\Test\Controller;
 
 use App\Entity\User;
+use App\Entity\Payment;
+use App\Entity\PaymentTicket;
+use App\Entity\Ticket;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -22,6 +25,19 @@ class UserControllerTest extends WebTestCase
         $this->repository = $this->manager->getRepository(User::class);
 
         foreach ($this->repository->findAll() as $object) {
+            // Remove related entities first to avoid foreign key constraint violations
+            $payments = $this->manager->getRepository(Payment::class)->findBy(['user' => $object]);
+            foreach ($payments as $payment) {
+                $paymentTickets = $this->manager->getRepository(PaymentTicket::class)->findBy(['payment' => $payment]);
+                foreach ($paymentTickets as $paymentTicket) {
+                    $this->manager->remove($paymentTicket);
+                }
+                $tickets = $this->manager->getRepository(Ticket::class)->findBy(['user' => $object]);
+                foreach ($tickets as $ticket) {
+                    $this->manager->remove($ticket);
+                }
+                $this->manager->remove($payment);
+            }
             $this->manager->remove($object);
         }
 
@@ -131,7 +147,23 @@ class UserControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
+        // Adicionar um pagamento associado ao usuário
+        $payment = new Payment();
+        $payment->setAmount(100.00);
+        $payment->setStatus(true);
+        $payment->setCreatedAt(new \DateTimeImmutable());
+        $payment->setUpdatedAt(new \DateTimeImmutable());
+        $payment->setUser($fixture);
+
+        $this->manager->persist($payment);
+        $this->manager->flush();
+
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+
+        // Remover o pagamento associado antes de remover o usuário
+        $this->manager->remove($payment);
+        $this->manager->flush();
+
         $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);

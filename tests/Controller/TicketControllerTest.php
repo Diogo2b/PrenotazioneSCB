@@ -6,6 +6,7 @@ use App\Entity\Ticket;
 use App\Entity\User;
 use App\Entity\SportMatch;
 use App\Entity\PriceType;
+use App\Entity\Payment;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -19,6 +20,7 @@ class TicketControllerTest extends WebTestCase
     private EntityRepository $userRepository;
     private EntityRepository $sportMatchRepository;
     private EntityRepository $priceTypeRepository;
+    private EntityRepository $paymentRepository;
     private string $path = '/ticket/';
 
     protected function setUp(): void
@@ -29,8 +31,13 @@ class TicketControllerTest extends WebTestCase
         $this->userRepository = $this->manager->getRepository(User::class);
         $this->sportMatchRepository = $this->manager->getRepository(SportMatch::class);
         $this->priceTypeRepository = $this->manager->getRepository(PriceType::class);
+        $this->paymentRepository = $this->manager->getRepository(Payment::class);
 
         foreach ($this->ticketRepository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+
+        foreach ($this->paymentRepository->findAll() as $object) {
             $this->manager->remove($object);
         }
 
@@ -188,7 +195,23 @@ class TicketControllerTest extends WebTestCase
         $this->manager->persist($ticket);
         $this->manager->flush();
 
+        // Adicionar um pagamento associado ao usuário para simular a relação
+        $payment = new Payment();
+        $payment->setAmount(20.50);
+        $payment->setStatus(true);
+        $payment->setCreatedAt(new \DateTimeImmutable());
+        $payment->setUpdatedAt(new \DateTimeImmutable());
+        $payment->setUser($user);
+
+        $this->manager->persist($payment);
+        $this->manager->flush();
+
         $this->client->request('GET', sprintf('%s%s', $this->path, $ticket->getId()));
+
+        // Remover o pagamento associado antes de remover o ticket e o usuário
+        $this->manager->remove($payment);
+        $this->manager->flush();
+
         $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);
