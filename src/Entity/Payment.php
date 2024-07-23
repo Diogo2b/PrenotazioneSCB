@@ -33,10 +33,7 @@ class Payment
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    /**
-     * @var Collection<int, PaymentTicket>
-     */
-    #[ORM\OneToMany(targetEntity: PaymentTicket::class, mappedBy: 'Payment')]
+    #[ORM\OneToMany(mappedBy: 'payment', targetEntity: PaymentTicket::class)]
     private Collection $paymentTickets;
 
     public function __construct()
@@ -69,7 +66,6 @@ class Payment
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -81,7 +77,6 @@ class Payment
     public function setAmount(string $amount): static
     {
         $this->amount = $amount;
-
         return $this;
     }
 
@@ -93,7 +88,6 @@ class Payment
     public function setStatus(bool $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 
@@ -105,7 +99,6 @@ class Payment
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -117,7 +110,6 @@ class Payment
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
-
         return $this;
     }
 
@@ -135,19 +127,16 @@ class Payment
             $this->paymentTickets->add($paymentTicket);
             $paymentTicket->setPayment($this);
         }
-
         return $this;
     }
 
     public function removePaymentTicket(PaymentTicket $paymentTicket): static
     {
         if ($this->paymentTickets->removeElement($paymentTicket)) {
-            // set the owning side to null (unless already changed)
             if ($paymentTicket->getPayment() === $this) {
                 $paymentTicket->setPayment(null);
             }
         }
-
         return $this;
     }
 }

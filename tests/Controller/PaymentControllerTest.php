@@ -11,46 +11,41 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class PaymentControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManagerInterface $entityManager;
-    private User $testUser;
+    private EntityManagerInterface $manager;
     private string $path = '/payment/';
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
-        $this->entityManager = static::getContainer()->get('doctrine')->getManager();
+        $this->manager = static::getContainer()->get('doctrine')->getManager();
 
-        // Limpar dados antigos
-        $this->cleanDatabase();
+        // Clean up the database before each test
+        foreach ($this->manager->getRepository(Payment::class)->findAll() as $object) {
+            $this->manager->remove($object);
+        }
 
-        // Criar usuário de teste
-        $this->testUser = new User();
-        $this->testUser->setEmail('testuser@example.com');
-        $this->testUser->setRoles(['ROLE_USER']);
-        $this->testUser->setPassword(password_hash('password', PASSWORD_BCRYPT));
-        $this->testUser->setUsername('TestUser');
-        $this->testUser->setFirstName('Test');
-        $this->testUser->setLastName('User');
-        $this->testUser->setCreatedAt(new \DateTimeImmutable());
-        $this->testUser->setUpdatedAt(new \DateTimeImmutable());
+        foreach ($this->manager->getRepository(User::class)->findAll() as $object) {
+            $this->manager->remove($object);
+        }
 
-        $this->entityManager->persist($this->testUser);
-        $this->entityManager->flush();
+        $this->manager->flush();
     }
 
-    private function cleanDatabase(): void
+    private function createUser(string $emailIdentifier): User
     {
-        $connection = $this->entityManager->getConnection();
-        $platform = $connection->getDatabasePlatform();
+        $user = new User();
+        $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setRoles(['ROLE_USER']);
+        $user->setPassword('testpassword');
+        $user->setUsername('testusername' . uniqid($emailIdentifier, true));
+        $user->setFirstName('Test');
+        $user->setLastName('User');
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->manager->persist($user);
+        $this->manager->flush();
 
-        $connection->beginTransaction();
-        try {
-            $connection->executeStatement($platform->getTruncateTableSQL('payment', true /* whether to cascade */));
-            $connection->executeStatement($platform->getTruncateTableSQL('user', true /* whether to cascade */));
-            $connection->commit();
-        } catch (\Exception $e) {
-            $connection->rollBack();
-        }
+        return $user;
     }
 
     public function testIndex(): void
@@ -58,98 +53,99 @@ class PaymentControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Liste des Paiements');
+        self::assertPageTitleContains('Liste des Paiements');  // Atualizando o título esperado
     }
+
 
     public function testNew(): void
     {
-        $crawler = $this->client->request('GET', sprintf('%snew', $this->path));
+        $user = $this->createUser('new');
+
+        $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
-        $form = $crawler->selectButton('Enregistrer')->form([
-            'payment[amount]' => '100.00',
+        $this->client->submitForm('Enregistrer', [
+            'payment[amount]' => '20.50',
             'payment[status]' => true,
-            'payment[user]' => $this->testUser->getId(),
+            'payment[user]' => $user->getId(),
         ]);
 
-        $this->client->submit($form);
-
         self::assertResponseRedirects($this->path);
-
-        self::assertSame(1, $this->entityManager->getRepository(Payment::class)->count([]));
+        self::assertSame(1, $this->manager->getRepository(Payment::class)->count([]));
     }
 
     public function testShow(): void
     {
+        $user = $this->createUser('show');
+
         $payment = new Payment();
-        $payment->setAmount('50.00');
+        $payment->setAmount('20.50');
         $payment->setStatus(true);
-        $payment->setUser($this->testUser);
+        $payment->setUser($user);
         $payment->setCreatedAt(new \DateTimeImmutable());
         $payment->setUpdatedAt(new \DateTimeImmutable());
 
-        $this->entityManager->persist($payment);
-        $this->entityManager->flush();
+        $this->manager->persist($payment);
+        $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $payment->getId()));
 
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Paiement');
-
-        self::assertStringContainsString('50.00', $this->client->getResponse()->getContent());
+        self::assertPageTitleContains('Paiement');  // Atualizando o título esperado
+        self::assertStringContainsString('20.50', $this->client->getResponse()->getContent());
     }
+
 
     public function testEdit(): void
     {
+        $user = $this->createUser('edit');
+
         $payment = new Payment();
-        $payment->setAmount('75.00');
+        $payment->setAmount('20.50');
         $payment->setStatus(true);
-        $payment->setUser($this->testUser);
+        $payment->setUser($user);
         $payment->setCreatedAt(new \DateTimeImmutable());
         $payment->setUpdatedAt(new \DateTimeImmutable());
 
-        $this->entityManager->persist($payment);
-        $this->entityManager->flush();
+        $this->manager->persist($payment);
+        $this->manager->flush();
 
-        $crawler = $this->client->request('GET', sprintf('%s%s/edit', $this->path, $payment->getId()));
+        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $payment->getId()));
 
-        self::assertResponseStatusCodeSame(200);
-
-        $form = $crawler->selectButton('Mettre à jour')->form([
-            'payment[amount]' => '80.00',
+        $this->client->submitForm('Mettre à jour', [
+            'payment[amount]' => '25.00',
+            'payment[status]' => '0',  // Atualizando o valor para '0' ou '1'
+            'payment[user]' => $user->getId(),
         ]);
 
-        $this->client->submit($form);
-
         self::assertResponseRedirects($this->path);
 
-        $updatedPayment = $this->entityManager->getRepository(Payment::class)->find($payment->getId());
+        $updatedPayment = $this->manager->getRepository(Payment::class)->find($payment->getId());
 
-        self::assertSame('80.00', $updatedPayment->getAmount());
+        self::assertSame('25.00', number_format($updatedPayment->getAmount(), 2, '.', ''));
+        self::assertFalse($updatedPayment->isStatus());
     }
 
-    public function testDelete(): void
+
+    public function testRemove(): void
     {
+        $user = $this->createUser('remove');
+
         $payment = new Payment();
-        $payment->setAmount('25.00');
+        $payment->setAmount('20.50');
         $payment->setStatus(true);
-        $payment->setUser($this->testUser);
+        $payment->setUser($user);
         $payment->setCreatedAt(new \DateTimeImmutable());
         $payment->setUpdatedAt(new \DateTimeImmutable());
 
-        $this->entityManager->persist($payment);
-        $this->entityManager->flush();
+        $this->manager->persist($payment);
+        $this->manager->flush();
 
-        $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $payment->getId()));
-
-        self::assertResponseStatusCodeSame(200);
-
-        $form = $crawler->selectButton('Supprimer')->form();
-        $this->client->submit($form);
+        $this->client->request('GET', sprintf('%s%s', $this->path, $payment->getId()));
+        $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);
-
-        self::assertSame(0, $this->entityManager->getRepository(Payment::class)->count([]));
+        self::assertSame(0, $this->manager->getRepository(Payment::class)->count([]));
     }
 }

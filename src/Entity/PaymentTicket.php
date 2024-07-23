@@ -15,7 +15,7 @@ class PaymentTicket
 
     #[ORM\ManyToOne(inversedBy: 'paymentTickets')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Payment $Payment = null;
+    private ?Payment $payment = null;
 
     #[ORM\ManyToOne(inversedBy: 'paymentTickets')]
     #[ORM\JoinColumn(nullable: false)]
@@ -28,13 +28,12 @@ class PaymentTicket
 
     public function getPayment(): ?Payment
     {
-        return $this->Payment;
+        return $this->payment;
     }
 
-    public function setPayment(?Payment $Payment): static
+    public function setPayment(?Payment $payment): static
     {
-        $this->Payment = $Payment;
-
+        $this->payment = $payment;
         return $this;
     }
 
@@ -46,7 +45,6 @@ class PaymentTicket
     public function setTicket(?Ticket $ticket): static
     {
         $this->ticket = $ticket;
-
         return $this;
     }
 }
