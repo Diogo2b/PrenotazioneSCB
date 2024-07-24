@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/seat')]
+#[Route('/admin/seat')]
 class SeatController extends AbstractController
 {
     #[Route('/', name: 'app_seat_index', methods: ['GET'])]
@@ -71,7 +71,7 @@ class SeatController extends AbstractController
     #[Route('/{id}', name: 'app_seat_delete', methods: ['POST'])]
     public function delete(Request $request, Seat $seat, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$seat->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $seat->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($seat);
             $entityManager->flush();
         }

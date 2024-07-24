@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/row')]
+#[Route('/admin/row')]
 class RowController extends AbstractController
 {
     #[Route('/', name: 'app_row_index', methods: ['GET'])]
@@ -71,7 +71,7 @@ class RowController extends AbstractController
     #[Route('/{id}', name: 'app_row_delete', methods: ['POST'])]
     public function delete(Request $request, Row $row, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$row->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $row->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($row);
             $entityManager->flush();
         }

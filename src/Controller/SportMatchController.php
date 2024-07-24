@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/sport/match')]
+#[Route('/admin/sport/match')]
 class SportMatchController extends AbstractController
 {
     #[Route('/', name: 'app_sport_match_index', methods: ['GET'])]

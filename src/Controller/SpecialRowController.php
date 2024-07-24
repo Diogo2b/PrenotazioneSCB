@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/special-row')]
+#[Route('/admin/special-row')]
 class SpecialRowController extends AbstractController
 {
     #[Route('/new', name: 'app_special_row_new', methods: ['GET', 'POST'])]

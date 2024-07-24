@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/sector')]
+#[Route('/admin/sector')]
 class SectorController extends AbstractController
 {
     #[Route('/', name: 'app_sector_index', methods: ['GET'])]

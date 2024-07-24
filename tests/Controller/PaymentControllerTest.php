@@ -35,7 +35,6 @@ class PaymentControllerTest extends WebTestCase
         $connection->executeStatement('TRUNCATE TABLE payment');
         $connection->executeStatement('TRUNCATE TABLE user');
         $connection->executeStatement('TRUNCATE TABLE ticket');
-        $connection->executeStatement('TRUNCATE TABLE payment_ticket');
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
     }
 

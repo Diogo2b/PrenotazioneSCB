@@ -28,9 +28,16 @@ class Seat
     #[ORM\OneToMany(targetEntity: AboSeat::class, mappedBy: 'seat')]
     private Collection $aboSeats;
 
+    /**
+     * @var Collection<int, Ticket>
+     */
+    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'seat')]
+    private Collection $tickets;
+
     public function __construct()
     {
         $this->aboSeats = new ArrayCollection();
+        $this->tickets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,6 +93,36 @@ class Seat
             // set the owning side to null (unless already changed)
             if ($aboSeat->getSeat() === $this) {
                 $aboSeat->setSeat(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ticket>
+     */
+    public function getTickets(): Collection
+    {
+        return $this->tickets;
+    }
+
+    public function addTicket(Ticket $ticket): static
+    {
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets->add($ticket);
+            $ticket->setSeat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTicket(Ticket $ticket): static
+    {
+        if ($this->tickets->removeElement($ticket)) {
+            // set the owning side to null (unless already changed)
+            if ($ticket->getSeat() === $this) {
+                $ticket->setSeat(null);
             }
         }
 

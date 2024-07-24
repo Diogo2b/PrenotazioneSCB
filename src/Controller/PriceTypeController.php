@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/price/type')]
+#[Route('/admin/price/type')]
 class PriceTypeController extends AbstractController
 {
     #[Route('/', name: 'app_price_type_index', methods: ['GET'])]
@@ -71,7 +71,7 @@ class PriceTypeController extends AbstractController
     #[Route('/{id}', name: 'app_price_type_delete', methods: ['POST'])]
     public function delete(Request $request, PriceType $priceType, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$priceType->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $priceType->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($priceType);
             $entityManager->flush();
         }

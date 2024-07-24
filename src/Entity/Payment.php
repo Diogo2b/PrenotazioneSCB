@@ -33,12 +33,16 @@ class Payment
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'payment', targetEntity: PaymentTicket::class)]
-    private Collection $paymentTickets;
+    /**
+     * @var Collection<int, Ticket>
+     */
+    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'payment')]
+    private Collection $tickets;
+
 
     public function __construct()
     {
-        $this->paymentTickets = new ArrayCollection();
+        $this->tickets = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -114,29 +118,32 @@ class Payment
     }
 
     /**
-     * @return Collection<int, PaymentTicket>
+     * @return Collection<int, Ticket>
      */
-    public function getPaymentTickets(): Collection
+    public function getTickets(): Collection
     {
-        return $this->paymentTickets;
+        return $this->tickets;
     }
 
-    public function addPaymentTicket(PaymentTicket $paymentTicket): static
+    public function addTicket(Ticket $ticket): static
     {
-        if (!$this->paymentTickets->contains($paymentTicket)) {
-            $this->paymentTickets->add($paymentTicket);
-            $paymentTicket->setPayment($this);
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets->add($ticket);
+            $ticket->setPayment($this);
         }
+
         return $this;
     }
 
-    public function removePaymentTicket(PaymentTicket $paymentTicket): static
+    public function removeTicket(Ticket $ticket): static
     {
-        if ($this->paymentTickets->removeElement($paymentTicket)) {
-            if ($paymentTicket->getPayment() === $this) {
-                $paymentTicket->setPayment(null);
+        if ($this->tickets->removeElement($ticket)) {
+            // set the owning side to null (unless already changed)
+            if ($ticket->getPayment() === $this) {
+                $ticket->setPayment(null);
             }
         }
+
         return $this;
     }
 }

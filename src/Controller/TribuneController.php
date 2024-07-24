@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/tribune')]
+#[Route('/admin/tribune')]
 class TribuneController extends AbstractController
 {
     #[Route('/', name: 'app_tribune_index', methods: ['GET'])]

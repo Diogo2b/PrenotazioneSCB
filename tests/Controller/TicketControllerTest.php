@@ -7,6 +7,8 @@ use App\Entity\User;
 use App\Entity\SportMatch;
 use App\Entity\PriceType;
 use App\Entity\Payment;
+use App\Entity\Seat;
+use App\Entity\Row;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -21,6 +23,7 @@ class TicketControllerTest extends WebTestCase
     private EntityRepository $sportMatchRepository;
     private EntityRepository $priceTypeRepository;
     private EntityRepository $paymentRepository;
+    private EntityRepository $seatRepository;
     private string $path = '/ticket/';
 
     protected function setUp(): void
@@ -32,12 +35,17 @@ class TicketControllerTest extends WebTestCase
         $this->sportMatchRepository = $this->manager->getRepository(SportMatch::class);
         $this->priceTypeRepository = $this->manager->getRepository(PriceType::class);
         $this->paymentRepository = $this->manager->getRepository(Payment::class);
+        $this->seatRepository = $this->manager->getRepository(Seat::class);
 
         foreach ($this->ticketRepository->findAll() as $object) {
             $this->manager->remove($object);
         }
 
         foreach ($this->paymentRepository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+
+        foreach ($this->seatRepository->findAll() as $object) {
             $this->manager->remove($object);
         }
 
@@ -91,6 +99,44 @@ class TicketControllerTest extends WebTestCase
         return $sportMatch;
     }
 
+    private function createRow(): Row
+    {
+        $row = new Row();
+        $row->setSigle('A');
+        $row->setCapacity(20);
+        $this->manager->persist($row);
+        $this->manager->flush();
+
+        return $row;
+    }
+
+    private function createSeat(): Seat
+    {
+        $row = $this->createRow();
+
+        $seat = new Seat();
+        $seat->setSeatNumber(1);
+        $seat->setRow($row);
+        $this->manager->persist($seat);
+        $this->manager->flush();
+
+        return $seat;
+    }
+
+    private function createPayment(User $user): Payment
+    {
+        $payment = new Payment();
+        $payment->setAmount(20.50);
+        $payment->setStatus(true);
+        $payment->setCreatedAt(new \DateTimeImmutable());
+        $payment->setUpdatedAt(new \DateTimeImmutable());
+        $payment->setUser($user);
+        $this->manager->persist($payment);
+        $this->manager->flush();
+
+        return $payment;
+    }
+
     public function testIndex(): void
     {
         $crawler = $this->client->request('GET', $this->path);
@@ -104,6 +150,8 @@ class TicketControllerTest extends WebTestCase
         $user = $this->createUser('new');
         $priceType = $this->createPriceType();
         $sportMatch = $this->createSportMatch($priceType);
+        $seat = $this->createSeat();
+        $payment = $this->createPayment($user);
 
         $this->client->request('GET', sprintf('%snew', $this->path));
 
@@ -114,6 +162,8 @@ class TicketControllerTest extends WebTestCase
             'ticket[status]' => true,
             'ticket[user]' => $user->getId(),
             'ticket[sportMatch]' => $sportMatch->getId(),
+            'ticket[seat]' => $seat->getId(),
+            'ticket[payment]' => $payment->getId(),
         ]);
 
         self::assertResponseRedirects($this->path);
@@ -125,12 +175,16 @@ class TicketControllerTest extends WebTestCase
         $user = $this->createUser('show');
         $priceType = $this->createPriceType();
         $sportMatch = $this->createSportMatch($priceType);
+        $seat = $this->createSeat();
+        $payment = $this->createPayment($user);
 
         $ticket = new Ticket();
         $ticket->setPrice('20.50');
         $ticket->setStatus(true);
         $ticket->setUser($user);
         $ticket->setSportMatch($sportMatch);
+        $ticket->setSeat($seat);
+        $ticket->setPayment($payment);
         $ticket->setCreatedAt(new \DateTimeImmutable());
         $ticket->setUpdatedAt(new \DateTimeImmutable());
 
@@ -149,12 +203,16 @@ class TicketControllerTest extends WebTestCase
         $user = $this->createUser('edit');
         $priceType = $this->createPriceType();
         $sportMatch = $this->createSportMatch($priceType);
+        $seat = $this->createSeat();
+        $payment = $this->createPayment($user);
 
         $ticket = new Ticket();
         $ticket->setPrice('20.50');
         $ticket->setStatus(true);
         $ticket->setUser($user);
         $ticket->setSportMatch($sportMatch);
+        $ticket->setSeat($seat);
+        $ticket->setPayment($payment);
         $ticket->setCreatedAt(new \DateTimeImmutable());
         $ticket->setUpdatedAt(new \DateTimeImmutable());
 
@@ -168,6 +226,8 @@ class TicketControllerTest extends WebTestCase
             'ticket[status]' => false,
             'ticket[user]' => $user->getId(),
             'ticket[sportMatch]' => $sportMatch->getId(),
+            'ticket[seat]' => $seat->getId(),
+            'ticket[payment]' => $payment->getId(),
         ]);
 
         self::assertResponseRedirects($this->path);
@@ -183,34 +243,23 @@ class TicketControllerTest extends WebTestCase
         $user = $this->createUser('remove');
         $priceType = $this->createPriceType();
         $sportMatch = $this->createSportMatch($priceType);
+        $seat = $this->createSeat();
+        $payment = $this->createPayment($user);
 
         $ticket = new Ticket();
         $ticket->setPrice('20.50');
         $ticket->setStatus(true);
         $ticket->setUser($user);
         $ticket->setSportMatch($sportMatch);
+        $ticket->setSeat($seat);
+        $ticket->setPayment($payment);
         $ticket->setCreatedAt(new \DateTimeImmutable());
         $ticket->setUpdatedAt(new \DateTimeImmutable());
 
         $this->manager->persist($ticket);
         $this->manager->flush();
 
-        // Adicionar um pagamento associado ao usuário para simular a relação
-        $payment = new Payment();
-        $payment->setAmount(20.50);
-        $payment->setStatus(true);
-        $payment->setCreatedAt(new \DateTimeImmutable());
-        $payment->setUpdatedAt(new \DateTimeImmutable());
-        $payment->setUser($user);
-
-        $this->manager->persist($payment);
-        $this->manager->flush();
-
         $this->client->request('GET', sprintf('%s%s', $this->path, $ticket->getId()));
-
-        // Remover o pagamento associado antes de remover o ticket e o usuário
-        $this->manager->remove($payment);
-        $this->manager->flush();
 
         $this->client->submitForm('Supprimer');
 

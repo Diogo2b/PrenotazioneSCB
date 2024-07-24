@@ -36,15 +36,18 @@ class Ticket
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    /**
-     * @var Collection<int, PaymentTicket>
-     */
-    #[ORM\OneToMany(targetEntity: PaymentTicket::class, mappedBy: 'ticket')]
-    private Collection $paymentTickets;
+
+
+    #[ORM\ManyToOne(inversedBy: 'tickets')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Seat $seat = null;
+
+    #[ORM\ManyToOne(inversedBy: 'tickets')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Payment $payment = null;
 
     public function __construct()
     {
-        $this->paymentTickets = new ArrayCollection();
     }
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
@@ -136,32 +139,28 @@ class Ticket
         return $this;
     }
 
-    /**
-     * @return Collection<int, PaymentTicket>
-     */
-    public function getPaymentTickets(): Collection
+
+
+    public function getSeat(): ?Seat
     {
-        return $this->paymentTickets;
+        return $this->seat;
     }
 
-    public function addPaymentTicket(PaymentTicket $paymentTicket): static
+    public function setSeat(?Seat $seat): static
     {
-        if (!$this->paymentTickets->contains($paymentTicket)) {
-            $this->paymentTickets->add($paymentTicket);
-            $paymentTicket->setTicket($this);
-        }
+        $this->seat = $seat;
 
         return $this;
     }
 
-    public function removePaymentTicket(PaymentTicket $paymentTicket): static
+    public function getPayment(): ?Payment
     {
-        if ($this->paymentTickets->removeElement($paymentTicket)) {
-            // set the owning side to null (unless already changed)
-            if ($paymentTicket->getTicket() === $this) {
-                $paymentTicket->setTicket(null);
-            }
-        }
+        return $this->payment;
+    }
+
+    public function setPayment(?Payment $payment): static
+    {
+        $this->payment = $payment;
 
         return $this;
     }

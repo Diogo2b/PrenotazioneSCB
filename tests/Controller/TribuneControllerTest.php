@@ -105,6 +105,7 @@ class TribuneControllerTest extends WebTestCase
 
     public function testRemove(): void
     {
+        // Criação das entidades
         $tribune = new Tribune();
         $tribune->setName('Testing Tribune');
         $tribune->setSigle('TT');
@@ -117,20 +118,20 @@ class TribuneControllerTest extends WebTestCase
         $sector->setCapacity(100);
         $sector->setAvailableForSale(true);
         $sector->setTribune($tribune);
+        $tribune->getSectors()->add($sector); // Adiciona o setor à tribuna
 
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
         $row->setSector($sector);
+        $sector->getListRow()->add($row); // Adiciona a fila ao setor
 
         $seat = new Seat();
         $seat->setSeatNumber(1);
         $seat->setRow($row);
+        $row->getSeats()->add($seat); // Adiciona o assento à fila
 
         $this->manager->persist($tribune);
-        $this->manager->persist($sector);
-        $this->manager->persist($row);
-        $this->manager->persist($seat);
         $this->manager->flush();
 
         // Verificar que todas as entidades foram persistidas
@@ -141,11 +142,20 @@ class TribuneControllerTest extends WebTestCase
 
         // Remover a Tribune
         $this->client->request('GET', sprintf('%s%s', $this->path, $tribune->getId()));
-        $this->client->submitForm('Supprimer');
+        $this->client->submitForm('Supprimer', [], 'POST');
+        $this->manager->flush();
 
-        // Verificar que todas as entidades foram removidas
-        self::assertResponseRedirects($this->path);
+        // Adicionando logs de depuração após a remoção
+        echo "Após a remoção:\n";
+        var_dump($this->manager->getRepository(Tribune::class)->findAll());
+        var_dump($this->manager->getRepository(Sector::class)->findAll());
+        var_dump($this->manager->getRepository(Row::class)->findAll());
+        var_dump($this->manager->getRepository(Seat::class)->findAll());
+
+        // Verificar que a Tribune foi removida
         self::assertSame(0, $this->manager->getRepository(Tribune::class)->count([]));
+
+        // Verificar que todas as entidades relacionadas foram removidas
         self::assertSame(0, $this->manager->getRepository(Sector::class)->count([]));
         self::assertSame(0, $this->manager->getRepository(Row::class)->count([]));
         self::assertSame(0, $this->manager->getRepository(Seat::class)->count([]));

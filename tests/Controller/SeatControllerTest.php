@@ -4,8 +4,8 @@ namespace App\Test\Controller;
 
 use App\Entity\Seat;
 use App\Entity\Row;
-use App\Entity\Tribune; // Add this line
-use App\Entity\Sector; // Add this line
+use App\Entity\Tribune;
+use App\Entity\Sector;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -65,14 +65,12 @@ class SeatControllerTest extends WebTestCase
 
     public function testShow(): void
     {
-        // Crie um Tribune para associar ao Sector
         $tribune = new Tribune();
         $tribune->setName('Tribune 1');
-        $tribune->setNumberedSeats(true); // Definindo numbered_seats
+        $tribune->setNumberedSeats(true);
         $this->manager->persist($tribune);
         $this->manager->flush();
 
-        // Crie um Sector para associar ao Row
         $sector = new Sector();
         $sector->setName('Sector 1');
         $sector->setCapacity(100);
@@ -82,7 +80,6 @@ class SeatControllerTest extends WebTestCase
         $this->manager->persist($sector);
         $this->manager->flush();
 
-        // Crie um Row para associar ao Seat
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
@@ -101,21 +98,11 @@ class SeatControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
 
-        // Ajuste esta linha com o título correto da página
         self::assertPageTitleContains('Détails du Siège');
     }
 
-
-
-
-
-
-
-
-
     public function testEdit(): void
     {
-        // Criação de uma Row para associar ao Seat
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
@@ -147,7 +134,6 @@ class SeatControllerTest extends WebTestCase
 
     public function testRemove(): void
     {
-        // Garantir que o banco de dados está limpo
         foreach ($this->repository->findAll() as $object) {
             $this->manager->remove($object);
         }
@@ -159,7 +145,6 @@ class SeatControllerTest extends WebTestCase
         }
         $this->manager->flush();
 
-        // Criar a Row e associar Seats
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
@@ -178,27 +163,21 @@ class SeatControllerTest extends WebTestCase
 
         $this->manager->flush();
 
-        // Verificar que há 2 Seats inicialmente
         self::assertSame(2, $this->repository->count([]));
 
-        // Remover um Seat
         $this->client->request('GET', sprintf('%s%s', $this->path, $seat1->getId()));
         $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);
 
-        // Verificar que apenas um Seat foi removido
         self::assertSame(1, $this->repository->count([]));
 
-        // Verificar que a Row ainda existe
         self::assertSame(1, $rowRepository->count([]));
 
-        // Verificar que o Seat restante está corretamente associado à Row
         $remainingSeat = $this->repository->findAll()[0];
         self::assertSame(2, $remainingSeat->getSeatNumber());
         self::assertSame($row->getId(), $remainingSeat->getRow()->getId());
 
-        // Verificar que não há mais Seats extras
         $seats = $this->repository->findAll();
         self::assertCount(1, $seats);
     }

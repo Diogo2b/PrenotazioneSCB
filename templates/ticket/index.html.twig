@@ -15,6 +15,8 @@
 				<th>Date de création</th>
 				<th>Date de mise à jour</th>
 				<th>Match</th>
+				<th>Siège</th>
+				<th>Paiement</th>
 				<th>Actions</th>
 			</tr>
 		</thead>
@@ -27,6 +29,8 @@
 					<td>{{ ticket.createdAt ? ticket.createdAt|date('d-m-Y H:i:s') : '' }}</td>
 					<td>{{ ticket.updatedAt ? ticket.updatedAt|date('d-m-Y H:i:s') : '' }}</td>
 					<td>{{ ticket.sportMatch ? ticket.sportMatch.homeTeam ~ ' vs ' ~ ticket.sportMatch.awayTeam : '' }}</td>
+					<td>{{ ticket.seat ? ticket.seat.seatNumber : '' }}</td>
+					<td>{{ ticket.payment ? ticket.payment.id : '' }}</td>
 					<td>
 						<a href="{{ path('app_ticket_show', {'id': ticket.id}) }}" class="btn btn-secondary">Voir</a>
 						<a href="{{ path('app_ticket_edit', {'id': ticket.id}) }}" class="btn btn-primary">Modifier</a>
@@ -34,7 +38,7 @@
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="7">Aucun enregistrement trouvé</td>
+					<td colspan="9">Aucun enregistrement trouvé</td>
 				</tr>
 			{% endfor %}
 		</tbody>

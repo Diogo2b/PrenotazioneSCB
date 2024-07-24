@@ -4,7 +4,6 @@ namespace App\Test\Controller;
 
 use App\Entity\User;
 use App\Entity\Payment;
-use App\Entity\PaymentTicket;
 use App\Entity\Ticket;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -28,10 +27,6 @@ class UserControllerTest extends WebTestCase
             // Remove related entities first to avoid foreign key constraint violations
             $payments = $this->manager->getRepository(Payment::class)->findBy(['user' => $object]);
             foreach ($payments as $payment) {
-                $paymentTickets = $this->manager->getRepository(PaymentTicket::class)->findBy(['payment' => $payment]);
-                foreach ($paymentTickets as $paymentTicket) {
-                    $this->manager->remove($paymentTicket);
-                }
                 $tickets = $this->manager->getRepository(Ticket::class)->findBy(['user' => $object]);
                 foreach ($tickets as $ticket) {
                     $this->manager->remove($ticket);
