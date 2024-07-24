@@ -1,6 +1,5 @@
 <?php
 
-// src/Command/DescribeEntitiesCommand.php
 namespace App\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,10 +15,10 @@ class DescribeEntitiesCommand extends Command
     public function __construct(EntityManagerInterface $entityManager)
     {
         parent::__construct();
-        $this->entityManager = $entityManager; // Injeção do EntityManager
+        $this->entityManager = $entityManager; // Injection du EntityManager
     }
 
-    protected function configure()
+    protected function configure(): void // Add void
     {
         $this
             ->setName('app:describe-entities')
