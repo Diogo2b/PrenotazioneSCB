@@ -6,6 +6,7 @@ use App\Entity\Tribune;
 use App\Entity\Sector;
 use App\Entity\Row;
 use App\Entity\Seat;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -16,14 +17,18 @@ class TribuneControllerTest extends WebTestCase
     private KernelBrowser $client;
     private EntityManagerInterface $manager;
     private EntityRepository $repository;
-    private string $path = '/tribune/';
+    private string $path = '/admin/tribune/';
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(Tribune::class);
         $this->clearDatabase();
+
+        $user = $this->createUser('admin');
+        $this->client->loginUser($user);
     }
 
     protected function tearDown(): void
@@ -41,6 +46,23 @@ class TribuneControllerTest extends WebTestCase
         $connection->executeStatement('TRUNCATE TABLE row');
         $connection->executeStatement('TRUNCATE TABLE seat');
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function createUser(string $emailIdentifier): User
+    {
+        $user = new User();
+        $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setRoles(['ROLE_ADMIN']);
+        $user->setPassword('testpassword');
+        $user->setUsername('testusername' . uniqid($emailIdentifier, true));
+        $user->setFirstName('Test');
+        $user->setLastName('User');
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->manager->persist($user);
+        $this->manager->flush();
+
+        return $user;
     }
 
     public function testIndex(): void
@@ -130,37 +152,36 @@ class TribuneControllerTest extends WebTestCase
         $sector->setCapacity(100);
         $sector->setAvailableForSale(true);
         $sector->setTribune($tribune);
-        $tribune->getSectors()->add($sector); // Adiciona o setor à tribuna
+        $tribune->getSectors()->add($sector);
 
         $row = new Row();
         $row->setSigle('A');
         $row->setCapacity(20);
         $row->setSector($sector);
-        $sector->getListRow()->add($row); // Adiciona a fila ao setor
+        $sector->getListRow()->add($row);
 
         $seat = new Seat();
         $seat->setSeatNumber(1);
         $seat->setRow($row);
-        $row->getSeats()->add($seat); // Adiciona o assento à fila
+        $row->getSeats()->add($seat);
 
         $this->manager->persist($tribune);
         $this->manager->flush();
 
-        // Verificar que todas as entidades foram persistidas
         self::assertSame(1, $this->manager->getRepository(Tribune::class)->count([]));
         self::assertSame(1, $this->manager->getRepository(Sector::class)->count([]));
         self::assertSame(1, $this->manager->getRepository(Row::class)->count([]));
         self::assertSame(1, $this->manager->getRepository(Seat::class)->count([]));
 
-        // Remover a Tribune
+        // Remove Tribune
         $this->client->request('GET', sprintf('%s%s', $this->path, $tribune->getId()));
         $this->client->submitForm('Supprimer', [], 'POST');
         $this->manager->flush();
 
-        // Verificar que a Tribune foi removida
+        // Vérifier que la Tribune a été supprimée
         self::assertSame(0, $this->manager->getRepository(Tribune::class)->count([]));
 
-        // Verificar que todas as entidades relacionadas foram removidas
+        // Vérifier que toutes les entités liées ont été supprimées
         self::assertSame(0, $this->manager->getRepository(Sector::class)->count([]));
         self::assertSame(0, $this->manager->getRepository(Row::class)->count([]));
         self::assertSame(0, $this->manager->getRepository(Seat::class)->count([]));

@@ -12,7 +12,7 @@ class PaymentControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
     private EntityManagerInterface $manager;
-    private string $path = '/payment/';
+    private string $path = '/admin/payment/';
 
     protected function setUp(): void
     {
@@ -20,8 +20,11 @@ class PaymentControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->clearDatabase();
-    }
 
+        // Cria e loga um usuário para os testes
+        $user = $this->createUser('admin');
+        $this->client->loginUser($user);
+    }
 
     private function clearDatabase(): void
     {
@@ -37,7 +40,7 @@ class PaymentControllerTest extends WebTestCase
     {
         $user = new User();
         $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
-        $user->setRoles(['ROLE_USER']);
+        $user->setRoles(['ROLE_ADMIN']);
         $user->setPassword('testpassword');
         $user->setUsername('testusername' . uniqid($emailIdentifier, true));
         $user->setFirstName('Test');
@@ -91,7 +94,6 @@ class PaymentControllerTest extends WebTestCase
         $this->manager->persist($payment);
         $this->manager->flush();
 
-        // Use the correct show URL
         $this->client->request('GET', sprintf('%s%s/show', $this->path, $payment->getId()));
 
         self::assertResponseStatusCodeSame(200);
@@ -117,7 +119,7 @@ class PaymentControllerTest extends WebTestCase
 
         $this->client->submitForm('Mettre à jour', [
             'payment[amount]' => '25.00',
-            'payment[status]' => '0',  // Atualizando o valor para '0' ou '1'
+            'payment[status]' => '0',
             'payment[user]' => $user->getId(),
         ]);
 
@@ -145,7 +147,6 @@ class PaymentControllerTest extends WebTestCase
 
         $this->client->request('GET', sprintf('%s%s/show', $this->path, $payment->getId()));
 
-        // Verificar o botão "Supprimer" e submetê-lo
         $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);

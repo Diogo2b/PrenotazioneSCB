@@ -6,6 +6,7 @@ use App\Entity\Seat;
 use App\Entity\Row;
 use App\Entity\Tribune;
 use App\Entity\Sector;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -16,10 +17,11 @@ class SeatControllerTest extends WebTestCase
     private KernelBrowser $client;
     private EntityManagerInterface $manager;
     private EntityRepository $repository;
-    private string $path = '/seat/';
+    private string $path = '/admin/seat/';
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(Seat::class);
@@ -29,7 +31,12 @@ class SeatControllerTest extends WebTestCase
         }
 
         $this->manager->flush();
+
+
+        $user = $this->createUser('admin');
+        $this->client->loginUser($user);
     }
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -39,7 +46,22 @@ class SeatControllerTest extends WebTestCase
         $this->manager->flush();
     }
 
+    private function createUser(string $emailIdentifier): User
+    {
+        $user = new User();
+        $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setRoles(['ROLE_ADMIN']);
+        $user->setPassword('testpassword');
+        $user->setUsername('testusername' . uniqid($emailIdentifier, true));
+        $user->setFirstName('Test');
+        $user->setLastName('User');
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->manager->persist($user);
+        $this->manager->flush();
 
+        return $user;
+    }
 
     public function testIndex(): void
     {
@@ -48,9 +70,9 @@ class SeatControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Liste des Sièges');
 
-        $this->assertSelectorTextContains('h1', 'Liste des Sièges');
-        $this->assertSelectorTextContains('a.btn.btn-primary', 'Créer nouveau');
-        $this->assertSelectorExists('table.table');
+        self::assertSelectorTextContains('h1', 'Liste des Sièges');
+        self::assertSelectorTextContains('a.btn.btn-primary', 'Créer nouveau');
+        self::assertSelectorExists('table.table');
     }
 
     public function testNew(): void

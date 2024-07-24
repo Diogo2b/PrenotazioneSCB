@@ -15,10 +15,11 @@ class UserControllerTest extends WebTestCase
     private KernelBrowser $client;
     private EntityManagerInterface $manager;
     private EntityRepository $repository;
-    private string $path = '/user/';
+    private string $path = '/admin/user/';
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(User::class);
@@ -37,6 +38,36 @@ class UserControllerTest extends WebTestCase
         }
 
         $this->manager->flush();
+
+
+        $adminUser = $this->createAdminUser('admin');
+        $this->client->loginUser($adminUser);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE user');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function createAdminUser(string $emailIdentifier): User
+    {
+        $user = new User();
+        $user->setEmail('testadmin' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setRoles(['ROLE_ADMIN']); // Atribui um papel de administrador
+        $user->setPassword('testpassword');
+        $user->setUsername('testadmin' . uniqid($emailIdentifier, true));
+        $user->setFirstName('Admin');
+        $user->setLastName('User');
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->manager->persist($user);
+        $this->manager->flush();
+
+        return $user;
     }
 
     public function testIndex(): void
@@ -63,7 +94,7 @@ class UserControllerTest extends WebTestCase
 
         self::assertResponseRedirects($this->path);
 
-        self::assertSame(1, $this->repository->count([]));
+        self::assertSame(1, $this->repository->count(['email' => 'testing@example.com']));
     }
 
     public function testShow(): void
@@ -142,7 +173,6 @@ class UserControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        // Adicionar um pagamento associado ao usuário
         $payment = new Payment();
         $payment->setAmount(100.00);
         $payment->setStatus(true);
@@ -155,21 +185,12 @@ class UserControllerTest extends WebTestCase
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
 
-        // Remover o pagamento associado antes de remover o usuário
         $this->manager->remove($payment);
         $this->manager->flush();
 
         $this->client->submitForm('Supprimer');
 
         self::assertResponseRedirects($this->path);
-        self::assertSame(0, $this->repository->count([]));
-    }
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $connection = $this->manager->getConnection();
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
-        $connection->executeStatement('TRUNCATE TABLE user');
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+        self::assertSame(0, $this->repository->count(['email' => 'ToRemove@example.com']));
     }
 }

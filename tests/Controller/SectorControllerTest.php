@@ -4,6 +4,7 @@ namespace App\Test\Controller;
 
 use App\Entity\Sector;
 use App\Entity\Tribune;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -14,10 +15,11 @@ class SectorControllerTest extends WebTestCase
     private KernelBrowser $client;
     private EntityManagerInterface $manager;
     private EntityRepository $repository;
-    private string $path = '/sector/';
+    private string $path = '/admin/sector/';
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(Sector::class);
@@ -27,6 +29,36 @@ class SectorControllerTest extends WebTestCase
         }
 
         $this->manager->flush();
+
+        // Crée et connecte un utilisateur pour les tests
+        $user = $this->createUser('admin');
+        $this->client->loginUser($user);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE sector');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function createUser(string $emailIdentifier): User
+    {
+        $user = new User();
+        $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setRoles(['ROLE_ADMIN']); // Attribuer un rôle d'administrateur
+        $user->setPassword('testpassword');
+        $user->setUsername('testusername' . uniqid($emailIdentifier, true));
+        $user->setFirstName('Test');
+        $user->setLastName('User');
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->manager->persist($user);
+        $this->manager->flush();
+
+        return $user;
     }
 
     public function testIndex(): void
@@ -125,7 +157,7 @@ class SectorControllerTest extends WebTestCase
             'sector[tribune]' => $tribune->getId(),
         ]);
 
-        self::assertResponseRedirects('/sector/');
+        self::assertResponseRedirects($this->path);
 
         $fixture = $this->repository->findAll();
 
@@ -160,15 +192,7 @@ class SectorControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Supprimer');
 
-        self::assertResponseRedirects('/sector/');
+        self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->repository->count([]));
-    }
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $connection = $this->manager->getConnection();
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
-        $connection->executeStatement('TRUNCATE TABLE sector');
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
     }
 }

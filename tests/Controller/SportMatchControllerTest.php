@@ -4,6 +4,7 @@ namespace App\Test\Controller;
 
 use App\Entity\SportMatch;
 use App\Entity\PriceType;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -15,10 +16,11 @@ class SportMatchControllerTest extends WebTestCase
     private EntityManagerInterface $manager;
     private EntityRepository $repository;
     private EntityRepository $priceTypeRepository;
-    private string $path = '/sport/match/';
+    private string $path = '/admin/sport/match/';
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(SportMatch::class);
@@ -28,6 +30,36 @@ class SportMatchControllerTest extends WebTestCase
             $this->manager->remove($object);
         }
         $this->manager->flush();
+
+        // Cria e loga um usuário para os testes
+        $user = $this->createUser('admin');
+        $this->client->loginUser($user);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE sport_match');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    private function createUser(string $emailIdentifier): User
+    {
+        $user = new User();
+        $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setRoles(['ROLE_ADMIN']);
+        $user->setPassword('testpassword');
+        $user->setUsername('testusername' . uniqid($emailIdentifier, true));
+        $user->setFirstName('Test');
+        $user->setLastName('User');
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->manager->persist($user);
+        $this->manager->flush();
+
+        return $user;
     }
 
     public function testIndex(): void
@@ -140,13 +172,5 @@ class SportMatchControllerTest extends WebTestCase
 
         self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->repository->count([]));
-    }
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $connection = $this->manager->getConnection();
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
-        $connection->executeStatement('TRUNCATE TABLE sport_match');
-        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
     }
 }

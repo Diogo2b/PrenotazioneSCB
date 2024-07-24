@@ -24,10 +24,11 @@ class TicketControllerTest extends WebTestCase
     private EntityRepository $priceTypeRepository;
     private EntityRepository $paymentRepository;
     private EntityRepository $seatRepository;
-    private string $path = '/ticket/';
+    private string $path = '/admin/ticket/';
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->ticketRepository = $this->manager->getRepository(Ticket::class);
@@ -54,7 +55,12 @@ class TicketControllerTest extends WebTestCase
         }
 
         $this->manager->flush();
+
+        // Cria e loga um usuário para os testes
+        $user = $this->createUser('admin');
+        $this->client->loginUser($user);
     }
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -73,12 +79,11 @@ class TicketControllerTest extends WebTestCase
         $this->manager->flush();
     }
 
-
     private function createUser(string $emailIdentifier): User
     {
         $user = new User();
         $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
-        $user->setRoles(['ROLE_USER']);
+        $user->setRoles(['ROLE_ADMIN']);
         $user->setPassword('testpassword');
         $user->setUsername('testusername' . uniqid($emailIdentifier, true));
         $user->setFirstName('Test');

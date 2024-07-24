@@ -6,6 +6,7 @@ use App\Entity\Row;
 use App\Entity\Seat;
 use App\Entity\Sector;
 use App\Entity\Tribune;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -18,10 +19,11 @@ class SpecialRowControllerTest extends WebTestCase
     private EntityRepository $rowRepository;
     private EntityRepository $seatRepository;
     private EntityRepository $sectorRepository;
-    private string $path = '/special-row/';
+    private string $path = '/admin/special-row/';
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->rowRepository = $this->manager->getRepository(Row::class);
@@ -41,6 +43,33 @@ class SpecialRowControllerTest extends WebTestCase
         }
 
         $this->manager->flush();
+
+
+        $user = $this->createUser('admin');
+        $this->client->loginUser($user);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->clearDatabase();
+    }
+
+    private function createUser(string $emailIdentifier): User
+    {
+        $user = new User();
+        $user->setEmail('testuser' . uniqid($emailIdentifier, true) . '@example.com');
+        $user->setRoles(['ROLE_ADMIN']);
+        $user->setPassword('testpassword');
+        $user->setUsername('testusername' . uniqid($emailIdentifier, true));
+        $user->setFirstName('Test');
+        $user->setLastName('User');
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->manager->persist($user);
+        $this->manager->flush();
+
+        return $user;
     }
 
     public function testNewSpecialRow(): void
@@ -73,7 +102,7 @@ class SpecialRowControllerTest extends WebTestCase
             'special_row[sector]' => $sector->getId(),
         ]);
 
-        self::assertResponseRedirects('/special-row/');
+        self::assertResponseRedirects('/admin/special-row/');
 
         // Verificar se a Row foi criada
         $row = $this->rowRepository->findOneBy(['sigle' => 'Testing Special Row']);
@@ -97,18 +126,13 @@ class SpecialRowControllerTest extends WebTestCase
         self::assertPageTitleContains('Liste des Rangées');
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->clearDatabase();
-    }
-
     private function clearDatabase(): void
     {
         $connection = $this->manager->getConnection();
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
         $connection->executeStatement('TRUNCATE TABLE row');
         $connection->executeStatement('TRUNCATE TABLE seat');
+        $connection->executeStatement('TRUNCATE TABLE sector');
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
     }
 }
