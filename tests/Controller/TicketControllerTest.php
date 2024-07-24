@@ -55,6 +55,24 @@ class TicketControllerTest extends WebTestCase
 
         $this->manager->flush();
     }
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        foreach ($this->ticketRepository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        foreach ($this->paymentRepository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        foreach ($this->seatRepository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        foreach ($this->userRepository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        $this->manager->flush();
+    }
+
 
     private function createUser(string $emailIdentifier): User
     {
