@@ -22,11 +22,6 @@ class PaymentControllerTest extends WebTestCase
         $this->clearDatabase();
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->clearDatabase();
-    }
 
     private function clearDatabase(): void
     {
@@ -155,5 +150,11 @@ class PaymentControllerTest extends WebTestCase
 
         self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->manager->getRepository(Payment::class)->count([]));
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->clearDatabase();
     }
 }
