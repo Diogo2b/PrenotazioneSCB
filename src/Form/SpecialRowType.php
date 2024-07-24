@@ -1,5 +1,4 @@
 <?php
-
 // src/Form/SpecialRowType.php
 
 namespace App\Form;
@@ -17,14 +16,21 @@ class SpecialRowType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('sigle')
+            ->add('sigle', null, [
+                'label' => 'Sigle',
+                'translation_domain' => false,
+            ])
             ->add('capacity', IntegerType::class, [
+                'label' => 'Capacité',
                 'data' => 20, // Valor padrão
+                'translation_domain' => false,
             ])
             ->add('sector', EntityType::class, [
                 'class' => Sector::class,
                 'choice_label' => 'name',
-                'placeholder' => 'Select Sector',
+                'label' => 'Secteur',
+                'placeholder' => 'Sélectionnez Secteur',
+                'translation_domain' => false,
             ]);
     }
 
