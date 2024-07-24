@@ -30,6 +30,16 @@ class SeatControllerTest extends WebTestCase
 
         $this->manager->flush();
     }
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        foreach ($this->repository->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        $this->manager->flush();
+    }
+
+
 
     public function testIndex(): void
     {
