@@ -23,12 +23,24 @@ class TribuneControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(Tribune::class);
+        $this->clearDatabase();
+    }
 
-        foreach ($this->repository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->clearDatabase();
+    }
 
-        $this->manager->flush();
+    private function clearDatabase(): void
+    {
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE tribune');
+        $connection->executeStatement('TRUNCATE TABLE sector');
+        $connection->executeStatement('TRUNCATE TABLE row');
+        $connection->executeStatement('TRUNCATE TABLE seat');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     public function testIndex(): void
@@ -144,13 +156,6 @@ class TribuneControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $tribune->getId()));
         $this->client->submitForm('Supprimer', [], 'POST');
         $this->manager->flush();
-
-        // Adicionando logs de depuração após a remoção
-        echo "Após a remoção:\n";
-        var_dump($this->manager->getRepository(Tribune::class)->findAll());
-        var_dump($this->manager->getRepository(Sector::class)->findAll());
-        var_dump($this->manager->getRepository(Row::class)->findAll());
-        var_dump($this->manager->getRepository(Seat::class)->findAll());
 
         // Verificar que a Tribune foi removida
         self::assertSame(0, $this->manager->getRepository(Tribune::class)->count([]));
