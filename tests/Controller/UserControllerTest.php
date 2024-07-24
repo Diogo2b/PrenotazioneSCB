@@ -164,4 +164,12 @@ class UserControllerTest extends WebTestCase
         self::assertResponseRedirects($this->path);
         self::assertSame(0, $this->repository->count([]));
     }
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE user');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+    }
 }
