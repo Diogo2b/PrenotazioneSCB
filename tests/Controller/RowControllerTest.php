@@ -202,4 +202,12 @@ class RowControllerTest extends WebTestCase
         self::assertSame(0, $this->repository->count([]));
         self::assertSame(0, $this->manager->getRepository(Seat::class)->count([]));
     }
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE row');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+    }
 }
