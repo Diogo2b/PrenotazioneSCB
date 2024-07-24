@@ -96,4 +96,19 @@ class SpecialRowControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Liste des Rangées');
     }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->clearDatabase();
+    }
+
+    private function clearDatabase(): void
+    {
+        $connection = $this->manager->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+        $connection->executeStatement('TRUNCATE TABLE row');
+        $connection->executeStatement('TRUNCATE TABLE seat');
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+    }
 }
